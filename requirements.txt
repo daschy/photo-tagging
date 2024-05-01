@@ -1,2 +1,7 @@
 transformers
 torch
+tensorflow
+tf-keras
+huggingface_hub
+scikit-image
+Image
