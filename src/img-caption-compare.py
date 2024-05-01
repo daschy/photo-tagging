@@ -61,7 +61,9 @@ def generate_captions(image):
     return caption_git_base, caption_git_large, caption_blip_base, caption_blip_large, caption_vitgpt
 
 
-url = 'http://images.cocodataset.org/val2017/000000039769.jpg'
-image = Image.open(requests.get(url, stream=True).raw)
+# url = 'https://piratediffusion.com/wp-content/uploads/sites/2/2023/11/photo_2023-11-14_10-35-12.jpg'
+# image = Image.open(requests.get(url, stream=True).raw)
+
+image =Image.open('/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_2276.NEF')
 
 pp(generate_captions(image=image))
