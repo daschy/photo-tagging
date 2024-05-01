@@ -2,7 +2,7 @@ from transformers import pipeline
 from PIL import Image
 import requests
 
-url = "https://unsplash.com/photos/g8oS8-82DxI/download?ixid=MnwxMjA3fDB8MXx0b3BpY3x8SnBnNktpZGwtSGt8fHx8fDJ8fDE2NzgxMDYwODc&force=true&w=640"
+url = "http://images.cocodataset.org/val2017/000000039769.jpg"
 
 image_to_text = pipeline("image-to-text", model="nlpconnect/vit-gpt2-image-captioning")
 
