@@ -5,3 +5,4 @@ tf-keras
 huggingface_hub
 scikit-image
 Image
+prettyprinter
