@@ -36,9 +36,9 @@ vitgpt_model.to(device)
 
 
 def generate_caption(processor, model, image, tokenizer=None):
-    inputs = processor(images=image, return_tensors="pt").to(device)
+    inputs = processor(images=image, return_tensors="pt", ).to(device)
     
-    generated_ids = model.generate(pixel_values=inputs.pixel_values, max_length=50)
+    generated_ids = model.generate(pixel_values=inputs.pixel_values, max_length=100)
 
     if tokenizer is not None:
         generated_caption = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
@@ -64,6 +64,6 @@ def generate_captions(image):
 # url = 'https://piratediffusion.com/wp-content/uploads/sites/2/2023/11/photo_2023-11-14_10-35-12.jpg'
 # image = Image.open(requests.get(url, stream=True).raw)
 
-image =Image.open('/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_2276.NEF')
+image =Image.open('/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF')
 
 pp(generate_captions(image=image))
