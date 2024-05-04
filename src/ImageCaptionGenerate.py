@@ -81,8 +81,8 @@ def _generate_caption(processor, model, image, tokenizer=None):
             generated_ids, skip_special_tokens=True
         )[0]
 
-    result = Caption(model.name_or_path, generated_caption)
-    pp(result)
+    result = Caption(generated_caption,model.name_or_path)
+    print(result)
     return result
 
 
@@ -100,6 +100,6 @@ def generateCaptionList(img_path) -> List[Caption]:
 # url = 'https://piratediffusion.com/wp-content/uploads/sites/2/2023/11/photo_2023-11-14_10-35-12.jpg'
 # image = Image.open(requests.get(url, stream=True).raw)
 
-imagePath = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
+# imagePath = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
 
-pp(generateCaptionList(imagePath=imagePath))
+# pp(generateCaptionList(imagePath=imagePath))
