@@ -67,3 +67,5 @@ def generate_captions(image):
 image =Image.open('/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF')
 
 pp(generate_captions(image=image))
+
+
