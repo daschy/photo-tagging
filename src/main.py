@@ -1,11 +1,13 @@
 from prettyprinter import cpprint as pp
-from reversegeotagging import get_gps_coordinates, reverse_geotag
+from ImageReverseGeoTagging import get_gps_coordinates, reverse_geotag
 from ImageKeywords import captionListToKeywords
 from ImageCaptionGenerate import generateCaptionList
 
 
 # Example usage
 image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
+image_path="/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_0716.NEF"
+image_path="/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_1780.NEF"
 
 image_caption_list = generateCaptionList(image_path)
 keywords = captionListToKeywords([item.caption for item in image_caption_list])

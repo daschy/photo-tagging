@@ -1,11 +1,7 @@
 from transformers import (
-    logging,
     pipeline,
-    AutoTokenizer,
-    AutoModelForTokenClassification,
 )
-from typing import List, Set
-from prettyprinter import cpprint as pp
+from typing import List
 
 
 def _extract_keywords_from_caption(caption):
