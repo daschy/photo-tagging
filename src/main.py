@@ -5,9 +5,11 @@ from ImageCaptionGenerate import generateCaptionList
 
 
 # Example usage
-image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
-image_path="/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_0716.NEF"
 image_path="/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_1780.NEF"
+image_path="/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_0716.NEF"
+image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_2610.NEF"
+
+
 
 image_caption_list = generateCaptionList(image_path)
 keywords = captionListToKeywords([item.caption for item in image_caption_list])

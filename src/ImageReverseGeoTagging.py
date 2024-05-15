@@ -1,6 +1,8 @@
 import exifread
 from geopy.geocoders import Nominatim
 
+from models.Location import Location
+
 def get_gps_coordinates(image_path):
     with open(image_path, 'rb') as f:
         tags = exifread.process_file(f)
@@ -26,19 +28,6 @@ def get_gps_coordinates(image_path):
             return latitude, longitude
         else:
             return None
-
-class Location:
-    def __init__(self):
-        # self.address = None
-        self.city = None
-        self.state = None
-        self.country = None
-        self.postal_code = None
-        self.road=None
-    def __str__(self):
-        attributes = [f"{key}: {value}" for key, value in self.__dict__.items()]
-        return ', '.join(attributes)
-
 
 def reverse_geotag(latitude, longitude):
     geolocator = Nominatim(user_agent="reverse_geotagger")
