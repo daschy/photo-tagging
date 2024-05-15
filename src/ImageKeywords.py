@@ -1,37 +1,41 @@
-from transformers import (
-    pipeline,
-)
+from transformers import pipeline
 from typing import List
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 
-def _extract_keywords_from_caption(caption):
-    token_classifier = pipeline(
-        model="vblagoje/bert-english-uncased-finetuned-pos",
-        aggregation_strategy="simple",
+token_classifier = pipeline(
+    model="vblagoje/bert-english-uncased-finetuned-pos",
+    aggregation_strategy="simple",
+)
+
+
+async def _extract_keywords_from_caption_async(caption):
+    executor = ThreadPoolExecutor()
+    tokens = await asyncio.get_event_loop().run_in_executor(
+        executor,
+        lambda: token_classifier(caption),
     )
-    # token_classifier("My name is Sarah and I live in London")
-
-    # token_classifier = pipeline(model="dslim/bert-base-NER-uncased", aggregation_strategy="simple" )
-    sentence = caption
-    tokens = token_classifier(sentence)
     nouns = [token["word"] for token in tokens if token["entity_group"] == "NOUN"]
     return nouns
 
 
-def captionListToKeywords(captionList: List[str]) -> List[str]:
+async def captionListToKeywords_async(captionList: List[str]) -> List[str]:
     merged_array = []
     for caption in captionList:
-        keywords: List[str] = _extract_keywords_from_caption(caption)
+        keywords = await _extract_keywords_from_caption_async(caption)
         merged_array.extend(keywords)
     return list(set(merged_array))
 
 
-# image_caption = "a woman sitting on a grassy field with a bunch of people"  # image_to_text_pipeline(image)[0]['generated_text']
-# keywords = captionListToKeywords([image_caption, "man in the middle"])
-# pp(keywords)
-# pp(extract_keywords(imgPath))
-# pp(tokens_noun)
+async def main():
+    image_captions = [
+        "a woman sitting on a grassy field with a bunch of people",
+        "man in the middle",
+    ]
+    keywords = await captionListToKeywords_async(image_captions)
+    print(keywords)
 
 
-# image = Image.fromarray(np.uint8(image)).convert("RGB")
-# image.show()
+# Run the asynchronous function
+asyncio.run(main())

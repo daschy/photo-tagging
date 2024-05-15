@@ -1,5 +1,7 @@
-import logging
+from LoggerUtils import GetLogger
+# import coloredlogs
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from typing import List
 from transformers import (
     AutoProcessor,
@@ -14,7 +16,6 @@ from transformers import (
 )
 
 from PIL import Image
-from concurrent.futures import ThreadPoolExecutor
 
 from models.Caption import Caption
 from models.AI import AI
@@ -71,70 +72,60 @@ async def _generate_caption(ai: AI, image) -> Caption:
             generated_ids, skip_special_tokens=True
         )[0]
     result = Caption(generated_caption, ai.model.name_or_path)
-    log.debug(f"{result}")
+    log.debug(f"Caption({result.modelName}): {result.text}")
     return result
 
 
-async def _generateCaptionList(image) -> List[Caption]:
+async def _generateCaptionList(image) -> List[str]:
     return [
-        await _generate_caption(git_base, image),
-        await _generate_caption(git_large, image),
-        await _generate_caption(blip_base, image),
-        await _generate_caption(blip_large, image),
-        await _generate_caption(vitgpt, image),
+        await _captionToTags(await _generate_caption(git_base, image)),
+        await _captionToTags(await _generate_caption(git_large, image)),
+        await _captionToTags(await _generate_caption(blip_base, image)),
+        await _captionToTags(await _generate_caption(blip_large, image)),
+        await _captionToTags(await _generate_caption(vitgpt, image)),
     ]
 
 
+# Token Classifier
 token_classifier = pipeline(
     model="vblagoje/bert-english-uncased-finetuned-pos",
     aggregation_strategy="simple",
 )
 
 
-def _extract_keywords_from_caption(caption):
-    token_classifier = pipeline(
-        model="vblagoje/bert-english-uncased-finetuned-pos",
-        aggregation_strategy="simple",
+async def _captionToTags(caption: Caption):
+    executor = ThreadPoolExecutor()
+    tokens = await asyncio.get_event_loop().run_in_executor(
+        executor,
+        lambda: token_classifier(caption.text),
     )
-    # token_classifier("My name is Sarah and I live in London")
-
-    # token_classifier = pipeline(model="dslim/bert-base-NER-uncased", aggregation_strategy="simple" )
-    sentence = caption
-    tokens = token_classifier(sentence)
     nouns = [token["word"] for token in tokens if token["entity_group"] == "NOUN"]
     return nouns
 
 
-def _captionListToKeywords(captionList: List[str]) -> List[str]:
-    merged_array = []
-    for caption in captionList:
-        keywords: List[str] = _extract_keywords_from_caption(caption)
-        merged_array.extend(keywords)
-    return list(set(merged_array))
-
-
 async def generateCaptionTags(img_path) -> List[str]:
-    captionList: List[Caption] = []
+    outputTags: List[str] = []
     with Image.open(img_path) as image:
-        captionList = await _generateCaptionList(image)
-        
-    outputTags = 
-    return [f"{caption.text}" for caption in captionList]
+        captionTagsList = await _generateCaptionList(image)
+        for tags in captionTagsList:
+            outputTags += tags
+    return list(set(outputTags))
 
 
 async def main():
     img_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
     captions = await generateCaptionTags(img_path)
-    for caption in captions:
-        log.debug(f"{caption}")
+    log.debug(f"{captions}")
 
 
 if __name__ == "__main__":
-    log = logging.getLogger(__name__)
-    log.setLevel(logging.DEBUG)
-    logging.basicConfig(
-        format="%(asctime)s.%(msecs)03d [%(levelname)s]: %(message)s",
-        # level=logging.DEBUG,
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+    log = GetLogger(__name__)
+    # coloredlogs.install()
+    # log = logging.getLogger(__name__)
+    # log.setLevel(logging.DEBUG)
+    # logging.basicConfig(
+    #     format="%(asctime)s.%(msecs)03d [%(levelname)s]: %(message)s",
+    #     # level=logging.DEBUG,
+    #     datefmt="%Y-%m-%d %H:%M:%S",
+    # )
     asyncio.run(main())
