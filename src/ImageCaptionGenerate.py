@@ -1,3 +1,6 @@
+import logging
+import asyncio
+from typing import List
 from transformers import (
     AutoProcessor,
     AutoTokenizer,
@@ -6,18 +9,14 @@ from transformers import (
     BlipForConditionalGeneration,
     VisionEncoderDecoderModel,
 )
-from typing import List
-import torch
+
 from PIL import Image
-from prettyprinter import cpprint as pp
-import asyncio
 from concurrent.futures import ThreadPoolExecutor
-import logging
 
 from models.Caption import Caption
 from models.AI import AI
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
+
 
 
 git_base = AI(
@@ -56,7 +55,7 @@ vitgpt = AI(
 
 
 async def _generate_caption(ai: AI, image) -> Caption:
-    inputs = ai.processor(images=image, return_tensors="pt").to(device)
+    inputs = ai.processor(images=image, return_tensors="pt").to(ai.device)
     executor = ThreadPoolExecutor()
     generated_ids = await asyncio.get_event_loop().run_in_executor(
         executor,
@@ -75,20 +74,26 @@ async def _generate_caption(ai: AI, image) -> Caption:
     return result
 
 
-async def generateCaptionList(img_path) -> List[Caption]:
+async def _generateCaptionList(image) -> List[Caption]:
+    return [
+        await _generate_caption(git_base, image),
+        await _generate_caption(git_large, image),
+        await _generate_caption(blip_base, image),
+        await _generate_caption(blip_large, image),
+        await _generate_caption(vitgpt, image),
+    ]
+
+
+async def generateCaptionTags(img_path) -> List[str]:
+    captionList: List[Caption] = []
     with Image.open(img_path) as image:
-        return [
-            await _generate_caption(git_base, image),
-            await _generate_caption(git_large, image),
-            await _generate_caption(blip_base, image),
-            await _generate_caption(blip_large, image),
-            await _generate_caption(vitgpt, image),
-        ]
+        captionList = await _generateCaptionList(image)
+    return [f"{caption.text}" for caption in captionList]
 
 
 async def main():
     img_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
-    captions = await generateCaptionList(img_path)
+    captions = await generateCaptionTags(img_path)
     for caption in captions:
         log.debug(f"{caption}")
 
