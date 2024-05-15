@@ -9,14 +9,15 @@ from transformers import (
     BlipForConditionalGeneration,
     VisionEncoderDecoderModel,
 )
+from transformers import (
+    pipeline,
+)
 
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
 
 from models.Caption import Caption
 from models.AI import AI
-
-
 
 
 git_base = AI(
@@ -84,10 +85,40 @@ async def _generateCaptionList(image) -> List[Caption]:
     ]
 
 
+token_classifier = pipeline(
+    model="vblagoje/bert-english-uncased-finetuned-pos",
+    aggregation_strategy="simple",
+)
+
+
+def _extract_keywords_from_caption(caption):
+    token_classifier = pipeline(
+        model="vblagoje/bert-english-uncased-finetuned-pos",
+        aggregation_strategy="simple",
+    )
+    # token_classifier("My name is Sarah and I live in London")
+
+    # token_classifier = pipeline(model="dslim/bert-base-NER-uncased", aggregation_strategy="simple" )
+    sentence = caption
+    tokens = token_classifier(sentence)
+    nouns = [token["word"] for token in tokens if token["entity_group"] == "NOUN"]
+    return nouns
+
+
+def _captionListToKeywords(captionList: List[str]) -> List[str]:
+    merged_array = []
+    for caption in captionList:
+        keywords: List[str] = _extract_keywords_from_caption(caption)
+        merged_array.extend(keywords)
+    return list(set(merged_array))
+
+
 async def generateCaptionTags(img_path) -> List[str]:
     captionList: List[Caption] = []
     with Image.open(img_path) as image:
         captionList = await _generateCaptionList(image)
+        
+    outputTags = 
     return [f"{caption.text}" for caption in captionList]
 
 

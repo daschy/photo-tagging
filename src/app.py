@@ -1,7 +1,7 @@
 import logging
 import asyncio
 from typing import List
-from ImageCaptionGenerate import generateCaptionTags
+from CaptionTags import generateCaptionTags
 
 
 # from ImageReverseGeoTagging import get_gps_coordinates, reverse_geotag
@@ -37,7 +37,8 @@ async def execute(image_path):
     captionTags: List[str] = await generateCaptionTags(image_path)
     geoTags: List[str] = []
     featureTags: List[str] = []
-    return captionTags + geoTags + featureTags
+    outputTags: List[str] = set(captionTags + geoTags + featureTags)
+    return outputTags
 
 
 async def main():
