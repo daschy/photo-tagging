@@ -1,5 +1,4 @@
 from Utils.LoggerUtils import GetLogger
-# import coloredlogs
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
@@ -20,6 +19,8 @@ from PIL import Image
 from Models.Caption import Caption
 from Models.AI import AI
 
+
+log = GetLogger(__name__)
 
 git_base = AI(
     processor=AutoProcessor.from_pretrained("microsoft/git-base-coco"),
@@ -119,5 +120,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    log = GetLogger(__name__)
     asyncio.run(main())

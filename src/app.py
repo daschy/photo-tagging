@@ -1,4 +1,4 @@
-import logging
+from Utils.LoggerUtils import GetLogger
 import asyncio
 from typing import List
 from CaptionTagging import generateCaptionTags
@@ -52,11 +52,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    log = logging.getLogger(__name__)
-    log.setLevel(logging.DEBUG)
-    logging.basicConfig(
-        format="%(asctime)s.%(msecs)03d [%(levelname)s]: %(message)s",
-        # level=logging.DEBUG,
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+    log = GetLogger(__name__)
     asyncio.run(main())
