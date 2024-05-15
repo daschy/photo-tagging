@@ -1,7 +1,7 @@
 import logging
 import asyncio
 from typing import List
-from CaptionTags import generateCaptionTags
+from CaptionTagging import generateCaptionTags
 
 
 # from ImageReverseGeoTagging import get_gps_coordinates, reverse_geotag

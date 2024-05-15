@@ -1,4 +1,4 @@
-from LoggerUtils import GetLogger
+from Utils.LoggerUtils import GetLogger
 # import coloredlogs
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
@@ -17,8 +17,8 @@ from transformers import (
 
 from PIL import Image
 
-from models.Caption import Caption
-from models.AI import AI
+from Models.Caption import Caption
+from Models.AI import AI
 
 
 git_base = AI(
@@ -120,12 +120,4 @@ async def main():
 
 if __name__ == "__main__":
     log = GetLogger(__name__)
-    # coloredlogs.install()
-    # log = logging.getLogger(__name__)
-    # log.setLevel(logging.DEBUG)
-    # logging.basicConfig(
-    #     format="%(asctime)s.%(msecs)03d [%(levelname)s]: %(message)s",
-    #     # level=logging.DEBUG,
-    #     datefmt="%Y-%m-%d %H:%M:%S",
-    # )
     asyncio.run(main())
