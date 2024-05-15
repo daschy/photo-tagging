@@ -2,6 +2,7 @@ from Utils.LoggerUtils import GetLogger
 import asyncio
 from typing import List
 from CaptionTagging import generateCaptionTags
+from ReverseGeoTagging import generateReverseGeoTags
 
 
 # from ImageReverseGeoTagging import get_gps_coordinates, reverse_geotag
@@ -35,9 +36,9 @@ from CaptionTagging import generateCaptionTags
 
 async def execute(image_path):
     captionTags: List[str] = await generateCaptionTags(image_path)
-    geoTags: List[str] = []
+    geoTags: List[str] = await generateReverseGeoTags(image_path)
     featureTags: List[str] = []
-    outputTags: List[str] = set(captionTags + geoTags + featureTags)
+    outputTags: List[str] = geoTags + captionTags + featureTags
     return outputTags
 
 
@@ -47,8 +48,7 @@ async def main():
     image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_2610.NEF"
     image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
     tagList = await execute(image_path)
-    for caption in tagList:
-        log.debug(f"{caption}")
+    log.debug(f"{tagList}")
 
 
 if __name__ == "__main__":
