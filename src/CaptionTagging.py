@@ -9,9 +9,10 @@ from transformers import (
     AutoModelForCausalLM,
     BlipForConditionalGeneration,
     VisionEncoderDecoderModel,
+    PaliGemmaForConditionalGeneration,
     CLIPProcessor,
     CLIPModel,
-    pipeline
+    pipeline,
 )
 
 from PIL import Image
@@ -61,22 +62,50 @@ clip_large = AI(
     processor=CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14"),
 )
 
+paligemma = AI(
+    model=PaliGemmaForConditionalGeneration.from_pretrained(
+        "google/paligemma-3b-mix-448"
+    ),
+    processor=AutoProcessor.from_pretrained("google/paligemma-3b-mix-448"),
+)
 
-async def _generate_caption(ai: AI, image) -> Caption:
-    inputs = ai.processor(images=image, return_tensors="pt").to(ai.device)
+
+async def _generate_caption(ai: AI, image, prompt: str) -> Caption:
     executor = ThreadPoolExecutor()
-    generated_ids = await asyncio.get_event_loop().run_in_executor(
-        executor,
-        lambda: ai.model.generate(pixel_values=inputs.pixel_values, max_length=100),
-    )
-    if ai.tokenizer is not None:
-        generated_caption = ai.tokenizer.batch_decode(
-            generated_ids, skip_special_tokens=True
+    if prompt is not None:
+        inputs = ai.processor(images=image, text=prompt, return_tensors="pt").to(
+            ai.device
+        )
+        generated_ids = await asyncio.get_event_loop().run_in_executor(
+            executor,
+            lambda: ai.model.generate(
+                **inputs,
+                max_new_tokens=30,
+                do_sample=False,
+            ),
+        )
+        decoded: str = ai.processor.batch_decode(
+            generated_ids,
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False,
+            padding=False,
         )[0]
+        generated_caption: str = decoded.split("\n")[1]
     else:
-        generated_caption = ai.processor.batch_decode(
-            generated_ids, skip_special_tokens=True
-        )[0]
+        inputs = ai.processor(images=image, return_tensors="pt").to(ai.device)
+        generated_ids = await asyncio.get_event_loop().run_in_executor(
+            executor,
+            lambda: ai.model.generate(pixel_values=inputs.pixel_values, max_length=100),
+        )
+        if ai.tokenizer is not None:
+            generated_caption = ai.tokenizer.batch_decode(
+                generated_ids, skip_special_tokens=True
+            )[0]
+        else:
+            generated_caption = ai.processor.batch_decode(
+                generated_ids, skip_special_tokens=True
+            )[0]
+
     result = Caption(generated_caption, ai.model.name_or_path)
     log.debug(f"Caption({result.modelName}): {result.text}")
     return result
@@ -84,11 +113,15 @@ async def _generate_caption(ai: AI, image) -> Caption:
 
 async def _generateCaptionList(image) -> List[str]:
     return [
-        await _captionToTags(await _generate_caption(git_base, image)),
-        await _captionToTags(await _generate_caption(git_large, image)),
-        await _captionToTags(await _generate_caption(blip_base, image)),
-        await _captionToTags(await _generate_caption(blip_large, image)),
-        await _captionToTags(await _generate_caption(vitgpt, image)),
+        # await _captionToTags(await _generate_caption(git_base, image)),
+        # await _captionToTags(await _generate_caption(git_large, image)),
+        # await _captionToTags(await _generate_caption(blip_base, image)),
+        # await _captionToTags(await _generate_caption(blip_large, image)),
+        # await _captionToTags(await _generate_caption(vitgpt, image)),
+        await _captionToTags(await _generate_caption(paligemma, image, "caption")),
+        await _captionToTags(
+            await _generate_caption(paligemma, image, "main 2 colors")
+        ),
     ]
 
 
@@ -109,7 +142,7 @@ async def _captionToTags(caption: Caption):
     return nouns
 
 
-async def generateCaptionTags(img_path) -> List[str]:
+async def generateCaptionTags(img_path: str) -> List[str]:
     outputTags: List[str] = []
     with Image.open(img_path) as image:
         captionTagsList = await _generateCaptionList(image)

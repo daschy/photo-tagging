@@ -7,6 +7,7 @@ from Utils.LoggerUtils import GetLogger
 
 log = GetLogger(__name__)
 
+
 def _get_gps_coordinates(image_path):
     with open(image_path, "rb") as f:
         tags = exifread.process_file(f)
@@ -39,7 +40,7 @@ def _get_gps_coordinates(image_path):
 
             return latitude, longitude
         else:
-            return None
+            return None, None
 
 
 def _reverse_geotag(latitude, longitude):
@@ -66,5 +67,8 @@ def _reverse_geotag(latitude, longitude):
 async def generateReverseGeoTags(image_path) -> List[str]:
     lat, long = _get_gps_coordinates(image_path=image_path)
     log.debug(f"lat={lat},long={long}")
-    address = _reverse_geotag(lat, long)
-    return [address.country, address.city, address.road]
+    if lat is None or long is None:
+        return []
+    else:
+        address = _reverse_geotag(lat, long)
+        return [address.country, address.city, address.road]
