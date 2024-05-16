@@ -9,9 +9,9 @@ from transformers import (
     AutoModelForCausalLM,
     BlipForConditionalGeneration,
     VisionEncoderDecoderModel,
-)
-from transformers import (
-    pipeline,
+    CLIPProcessor,
+    CLIPModel,
+    pipeline
 )
 
 from PIL import Image
@@ -54,6 +54,11 @@ vitgpt = AI(
         "nlpconnect/vit-gpt2-image-captioning"
     ),
     tokenizer=AutoTokenizer.from_pretrained("nlpconnect/vit-gpt2-image-captioning"),
+)
+
+clip_large = AI(
+    model=CLIPModel.from_pretrained("openai/clip-vit-large-patch14"),
+    processor=CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14"),
 )
 
 
