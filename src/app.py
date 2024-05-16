@@ -7,10 +7,10 @@ from Utils.Images import *
 
 
 async def execute(image_path):
-    featureTags: List[str] = [
-        await generateCaptionTags(image_path),
-        await generateReverseGeoTags(image_path)
-    ]
+    featureTags: List[str] = await generateCaptionTags(
+        image_path
+    ) + await generateReverseGeoTags(image_path)
+
     outputTags: List[str] = list(set(featureTags))
     return outputTags
 
