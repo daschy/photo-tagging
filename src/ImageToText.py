@@ -82,9 +82,12 @@ log.debug("End Init AI")
 async def _generate_caption(ai: AI, image, prompt: str) -> Caption:
     executor = ThreadPoolExecutor()
     if prompt is not None:
+        log.debug(f"Start process {ai.model.name_or_path}")
         inputs = ai.processor(images=image, text=prompt, return_tensors="pt").to(
             ai.device
         )
+        log.debug(f"End process {ai.model.name_or_path}")
+        log.debug(f"Start generate {ai.model.name_or_path}")
         generated_ids = await asyncio.get_event_loop().run_in_executor(
             executor,
             lambda: ai.model.generate(
@@ -93,6 +96,8 @@ async def _generate_caption(ai: AI, image, prompt: str) -> Caption:
                 do_sample=False,
             ),
         )
+        log.debug(f"End generate {ai.model.name_or_path}")
+        log.debug(f"Start decode {ai.model.name_or_path}")
         decoded: str = ai.processor.batch_decode(
             generated_ids,
             skip_special_tokens=True,
@@ -100,6 +105,7 @@ async def _generate_caption(ai: AI, image, prompt: str) -> Caption:
             padding=False,
         )[0]
         generated_caption: str = decoded.split("\n")[1]
+        log.debug(f"End decode {ai.model.name_or_path}")
     else:
         inputs = ai.processor(images=image, return_tensors="pt").to(ai.device)
         generated_ids = await asyncio.get_event_loop().run_in_executor(
