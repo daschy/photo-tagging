@@ -23,44 +23,45 @@ from Models.AI import AI
 
 log = GetLogger(__name__)
 
-git_base = AI(
-    processor=AutoProcessor.from_pretrained("microsoft/git-base-coco"),
-    model=AutoModelForCausalLM.from_pretrained("microsoft/git-base-coco"),
-)
+log.debug("Start init AI")
+# git_base = AI(
+#     processor=AutoProcessor.from_pretrained("microsoft/git-base-coco"),
+#     model=AutoModelForCausalLM.from_pretrained("microsoft/git-base-coco"),
+# )
 
-git_large = AI(
-    processor=AutoProcessor.from_pretrained("microsoft/git-large-coco"),
-    model=AutoModelForCausalLM.from_pretrained("microsoft/git-large-coco"),
-)
+# git_large = AI(
+#     processor=AutoProcessor.from_pretrained("microsoft/git-large-coco"),
+#     model=AutoModelForCausalLM.from_pretrained("microsoft/git-large-coco"),
+# )
 
-blip_base = AI(
-    processor=AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-base"),
-    model=BlipForConditionalGeneration.from_pretrained(
-        "Salesforce/blip-image-captioning-base"
-    ),
-)
+# blip_base = AI(
+#     processor=AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-base"),
+#     model=BlipForConditionalGeneration.from_pretrained(
+#         "Salesforce/blip-image-captioning-base"
+#     ),
+# )
 
-blip_large = AI(
-    processor=AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-large"),
-    model=BlipForConditionalGeneration.from_pretrained(
-        "Salesforce/blip-image-captioning-large"
-    ),
-)
+# blip_large = AI(
+#     processor=AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-large"),
+#     model=BlipForConditionalGeneration.from_pretrained(
+#         "Salesforce/blip-image-captioning-large"
+#     ),
+# )
 
-vitgpt = AI(
-    processor=AutoImageProcessor.from_pretrained(
-        "nlpconnect/vit-gpt2-image-captioning"
-    ),
-    model=VisionEncoderDecoderModel.from_pretrained(
-        "nlpconnect/vit-gpt2-image-captioning"
-    ),
-    tokenizer=AutoTokenizer.from_pretrained("nlpconnect/vit-gpt2-image-captioning"),
-)
+# vitgpt = AI(
+#     processor=AutoImageProcessor.from_pretrained(
+#         "nlpconnect/vit-gpt2-image-captioning"
+#     ),
+#     model=VisionEncoderDecoderModel.from_pretrained(
+#         "nlpconnect/vit-gpt2-image-captioning"
+#     ),
+#     tokenizer=AutoTokenizer.from_pretrained("nlpconnect/vit-gpt2-image-captioning"),
+# )
 
-clip_large = AI(
-    model=CLIPModel.from_pretrained("openai/clip-vit-large-patch14"),
-    processor=CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14"),
-)
+# clip_large = AI(
+#     model=CLIPModel.from_pretrained("openai/clip-vit-large-patch14"),
+#     processor=CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14"),
+# )
 
 paligemma = AI(
     model=PaliGemmaForConditionalGeneration.from_pretrained(
@@ -69,6 +70,14 @@ paligemma = AI(
     processor=AutoProcessor.from_pretrained("google/paligemma-3b-mix-448"),
 )
 
+# Token Classifier
+token_classifier = pipeline(
+    model="vblagoje/bert-english-uncased-finetuned-pos",
+    aggregation_strategy="simple",
+)
+
+
+log.debug("End Init AI")
 
 async def _generate_caption(ai: AI, image, prompt: str) -> Caption:
     executor = ThreadPoolExecutor()
@@ -126,12 +135,6 @@ async def _generateCaptionList(image) -> List[str]:
         ),
     ]
 
-
-# Token Classifier
-token_classifier = pipeline(
-    model="vblagoje/bert-english-uncased-finetuned-pos",
-    aggregation_strategy="simple",
-)
 
 
 async def _captionToTags(caption: Caption, type: str = None or "NOUN" or "ADJ"):
