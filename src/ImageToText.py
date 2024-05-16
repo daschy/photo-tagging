@@ -80,7 +80,7 @@ async def _generate_caption(ai: AI, image, prompt: str) -> Caption:
             executor,
             lambda: ai.model.generate(
                 **inputs,
-                max_new_tokens=30,
+                max_new_tokens=50,
                 do_sample=False,
             ),
         )
@@ -118,9 +118,11 @@ async def _generateCaptionList(image) -> List[str]:
         # await _captionToTags(await _generate_caption(blip_base, image)),
         # await _captionToTags(await _generate_caption(blip_large, image)),
         # await _captionToTags(await _generate_caption(vitgpt, image)),
-        await _captionToTags(await _generate_caption(paligemma, image, "caption")),
         await _captionToTags(
-            await _generate_caption(paligemma, image, "main 2 colors")
+            await _generate_caption(paligemma, image, "caption"), "NOUN"
+        ),
+        await _captionToTags(
+            await _generate_caption(paligemma, image, "main 2 colors"), type="ADJ"
         ),
     ]
 
@@ -132,13 +134,15 @@ token_classifier = pipeline(
 )
 
 
-async def _captionToTags(caption: Caption):
+async def _captionToTags(caption: Caption, type: str = None or "NOUN" or "ADJ"):
     executor = ThreadPoolExecutor()
     tokens = await asyncio.get_event_loop().run_in_executor(
         executor,
         lambda: token_classifier(caption.text),
     )
-    nouns = [token["word"] for token in tokens if token["entity_group"] == "NOUN"]
+    nouns = [
+        token["word"] for token in tokens if token["entity_group"] == (type or "NOUN")
+    ]
     return nouns
 
 

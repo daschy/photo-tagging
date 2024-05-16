@@ -1,9 +1,8 @@
-import gradio as gr
 from transformers import AutoProcessor, AutoTokenizer, AutoImageProcessor, AutoModelForCausalLM, BlipForConditionalGeneration, VisionEncoderDecoderModel
 import torch
 from PIL import Image
 from prettyprinter import cpprint as pp
-import requests
+
 
 # torch.hub.download_url_to_file('http://images.cocodataset.org/val2017/000000039769.jpg', './cats.jpg')
 # torch.hub.download_url_to_file('https://huggingface.co/datasets/nielsr/textcaps-sample/resolve/main/stop_sign.png', './stop_sign.png')

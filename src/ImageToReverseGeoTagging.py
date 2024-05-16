@@ -1,4 +1,4 @@
-import exifread
+from exifread import open, exifread
 from typing import List
 from geopy.geocoders import Nominatim
 

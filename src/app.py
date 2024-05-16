@@ -1,8 +1,8 @@
 from Utils.LoggerUtils import GetLogger
 import asyncio
 from typing import List
-from CaptionTagging import generateCaptionTags
-from ReverseGeoTagging import generateReverseGeoTags
+from ImageToText import generateCaptionTags
+from src.ImageToReverseGeoTagging import generateReverseGeoTags
 from Utils.Images import *
 
 
