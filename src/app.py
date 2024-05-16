@@ -2,7 +2,7 @@ from Utils.LoggerUtils import GetLogger
 import asyncio
 from typing import List
 from ImageToText import generateCaptionTags
-from src.ImageToReverseGeoTagging import generateReverseGeoTags
+from ImageToReverseGeoTagging import generateReverseGeoTags
 from Utils.Images import *
 
 
@@ -20,9 +20,11 @@ async def main():
     # image_path = "/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_0716.NEF"
     # image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_2610.NEF"
     # image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
-    image_path = people_biking
-    tagList = await execute(image_path)
-    log.debug(f"{tagList}")
+    images = [people_park_smoking, people_biking, nature_dog, nature_mushroom, nature_woods]
+    for image_path in images:
+        # image_path = people_biking
+        tagList = await execute(image_path)
+        log.info(f"{image_path}: {tagList}")
 
 
 if __name__ == "__main__":

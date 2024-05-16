@@ -161,13 +161,15 @@ async def generateCaptionTags(img_path: str) -> List[str]:
         captionTagsList = await _generateCaptionList(image)
         for tags in captionTagsList:
             outputTags += tags
-    return list(set(outputTags))
+    output = list(set(outputTags))
+    log.debug(f"{img_path}: {output}")
+    return output
 
 
 async def main():
     img_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
     captions = await generateCaptionTags(img_path)
-    log.debug(f"{captions}")
+    log.info(f"{captions}")
 
 
 if __name__ == "__main__":

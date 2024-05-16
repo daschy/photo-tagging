@@ -1,4 +1,4 @@
-from exifread import open, exifread
+import exifread
 from typing import List
 from geopy.geocoders import Nominatim
 
@@ -66,9 +66,11 @@ def _reverse_geotag(latitude, longitude):
 
 async def generateReverseGeoTags(image_path) -> List[str]:
     lat, long = _get_gps_coordinates(image_path=image_path)
-    log.debug(f"lat={lat},long={long}")
+    log.debug(f"{image_path}: lat={lat},long={long}")
     if lat is None or long is None:
-        return []
+        output = []
     else:
         address = _reverse_geotag(lat, long)
-        return [address.country, address.city, address.road]
+        output = [address.country, address.city, address.road]
+    log.debug(f"{image_path}: {output}")
+    return output
