@@ -8,7 +8,7 @@ from Utils.Images import *
 
 async def execute(image_path) -> List[str]:
     featureTags: List[List[str]] = await asyncio.gather(
-        generateCaptionTags(image_path), await generateReverseGeoTags(image_path)
+        generateCaptionTags(image_path), generateReverseGeoTags(image_path)
     )
 
     outputTags: List[str] = list(set(featureTags[0] + featureTags[1]))
