@@ -1,6 +1,6 @@
 from gliner import GLiNER
 from typing import List
-from LoggerUtils import GetLogger
+from .LoggerUtils import GetLogger
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
  

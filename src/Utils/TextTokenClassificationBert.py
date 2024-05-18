@@ -1,11 +1,11 @@
-from LoggerUtils import GetLogger
+from .LoggerUtils import GetLogger
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
 from transformers import (
     pipeline,
 )
-from Token import Token
+from .Token import Token
 from enum import Enum
 
 log = GetLogger(__name__)
@@ -26,7 +26,7 @@ class LABELS(Enum):
     ADJ = "ADJ"
 
 
-async def captionToTokens(text: str, label: LABELS) -> List[Token]:
+async def textToTokens(text: str, label: LABELS) -> List[Token]:
     loop = asyncio.get_running_loop()
     log.debug(f"Start tokenization {label.value}")
     with ThreadPoolExecutor() as pool:
@@ -48,7 +48,7 @@ async def main():
     # tokens = await captionToTokens(text, LABELS.ADJ)
     # tokens = await captionToTokens(text, LABELS.NOUN)
     tokensAll = await asyncio.gather(
-        captionToTokens(text, LABELS.ADJ), captionToTokens(text, LABELS.NOUN)
+        textToTokens(text, LABELS.ADJ), textToTokens(text, LABELS.NOUN)
     )
     log.debug(f"{[token.text for token in tokensAll[0]]}")
     log.debug(f"{[token.text for token in tokensAll[1]]}")

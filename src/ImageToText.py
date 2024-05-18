@@ -12,6 +12,8 @@ from PIL import Image
 
 from Models.Caption import Caption
 from Models.AI import AI
+from Utils.TextTokenClassificationBert import textToTokens, LABELS
+from Utils.Token import Token
 
 
 log = GetLogger(__name__)
@@ -32,6 +34,7 @@ token_classifier = pipeline(
 
 
 log.debug("End Init AI")
+
 
 async def _generate_caption(ai: AI, image, prompt: str) -> Caption:
     executor = ThreadPoolExecutor()
@@ -80,21 +83,24 @@ async def _generate_caption(ai: AI, image, prompt: str) -> Caption:
     return result
 
 
-async def _generateCaptionList(image) -> List[str]:
-    return [
-        # await _captionToTags(await _generate_caption(git_base, image)),
-        # await _captionToTags(await _generate_caption(git_large, image)),
-        # await _captionToTags(await _generate_caption(blip_base, image)),
-        # await _captionToTags(await _generate_caption(blip_large, image)),
-        # await _captionToTags(await _generate_caption(vitgpt, image)),
-        await _captionToTags(
-            await _generate_caption(paligemma, image, "caption"), "NOUN"
-        ),
-        await _captionToTags(
-            await _generate_caption(paligemma, image, "main 2 colors"), type="ADJ"
-        ),
-    ]
+async def _generateKeywordList(image) -> List[str]:
+    captionList = await asyncio.gather(
+        _generate_caption(paligemma, image, "caption"),
+        _generate_caption(paligemma, image, "main 2 colors"),
+    )
 
+    tokenList: List[Token] = await asyncio.gather(
+        textToTokens(captionList[0].text, LABELS.NOUN),
+        textToTokens(captionList[1].text, LABELS.ADJ),
+    )
+    output = list(
+        set(
+            []
+            + [token.text for token in tokenList[0]]
+            + [token.text for token in tokenList[1]]
+        )
+    )
+    return output
 
 
 async def _captionToTags(caption: Caption, type: str = None or "NOUN" or "ADJ"):
@@ -110,12 +116,11 @@ async def _captionToTags(caption: Caption, type: str = None or "NOUN" or "ADJ"):
 
 
 async def generateCaptionTags(img_path: str) -> List[str]:
-    outputTags: List[str] = []
+    outputKeywords: List[str] = []
     with Image.open(img_path) as image:
-        captionTagsList = await _generateCaptionList(image)
-        for tags in captionTagsList:
-            outputTags += tags
-    output = list(set(outputTags))
+        outputKeywords = await _generateKeywordList(image)
+
+    output = outputKeywords
     log.debug(f"{img_path}: {output}")
     return output
 

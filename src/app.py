@@ -6,7 +6,7 @@ from ImageToReverseGeoTagging import generateReverseGeoTags
 from Utils.Images import *
 
 
-async def execute(image_path):
+async def execute(image_path) -> List[str]:
     featureTags: List[str] = await generateCaptionTags(
         image_path
     ) + await generateReverseGeoTags(image_path)
@@ -20,10 +20,17 @@ async def main():
     # image_path = "/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_0716.NEF"
     # image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_2610.NEF"
     # image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
-    images = [people_park_smoking, people_biking, nature_dog, nature_mushroom, nature_woods]
-    for image_path in images:
-        # image_path = people_biking
-        tagList = await execute(image_path)
+    images = [
+        people_park_smoking,
+        people_biking,
+        nature_dog,
+        nature_mushroom,
+        nature_woods,
+    ]
+    keywords = await asyncio.gather(*([execute(img) for img in images]))
+    for idx, image_path in enumerate(images):
+
+        tagList = keywords[idx]
         log.info(f"{image_path}: {tagList}")
 
 
