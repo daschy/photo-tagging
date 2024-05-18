@@ -7,29 +7,24 @@ from Utils.Images import *
 
 
 async def execute(image_path) -> List[str]:
-    featureTags: List[str] = await generateCaptionTags(
-        image_path
-    ) + await generateReverseGeoTags(image_path)
+    featureTags: List[List[str]] = await asyncio.gather(
+        generateCaptionTags(image_path), await generateReverseGeoTags(image_path)
+    )
 
-    outputTags: List[str] = list(set(featureTags))
+    outputTags: List[str] = list(set(featureTags[0] + featureTags[1]))
     return outputTags
 
 
 async def main():
-    # image_path = "/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_1780.NEF"
-    # image_path = "/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_0716.NEF"
-    # image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_2610.NEF"
-    # image_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
     images = [
-        people_park_smoking, #//ZDS_1759.NEF
-        people_biking, #//ZDS_2610.NEF
-        nature_dog, #//ZDS_2276.NEF
-        nature_mushroom, #//ZDS_1780.NEF
-        nature_woods, #//ZDS_2322.NEF
+        people_park_smoking,  # //ZDS_1759.NEF
+        people_biking,  # //ZDS_2610.NEF
+        nature_dog,  # //ZDS_2276.NEF
+        nature_mushroom,  # //ZDS_1780.NEF
+        nature_woods,  # //ZDS_2322.NEF
     ]
     keywords = await asyncio.gather(*([execute(img) for img in images]))
     for idx, image_path in enumerate(images):
-
         tagList = keywords[idx]
         log.info(f"{image_path}: {tagList}")
 
