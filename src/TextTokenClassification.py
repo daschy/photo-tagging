@@ -1,35 +1,47 @@
-import torch
-import transformers
+from gliner import GLiNER
+from typing import List
+from Utils.LoggerUtils import GetLogger
+import asyncio
+
+log = GetLogger(__name__)
+log.debug("Start init AI")
+model = GLiNER.from_pretrained("numind/NuNerZero")
+log.debug("End init AI")
 
 
-model = transformers.AutoModel.from_pretrained(
-    'numind/NuNER-multilingual-v0.1',
-    output_hidden_states=True,
-)
-tokenizer = transformers.AutoTokenizer.from_pretrained(
-    'numind/NuNER-multilingual-v0.1',
-)
-
-text = [
-    "NuMind is an AI company based in Paris and USA.",
-    "NuMind est une entreprise d'IA basée à Paris et aux États-Unis.",
-    "See other models from us on https://huggingface.co/numind"
-]
-encoded_input = tokenizer(
-    text,
-    return_tensors='pt',
-    padding=True,
-    truncation=True
-)
-output = model(**encoded_input)
-
-# two emb trick: for better quality
-emb = torch.cat(
-    (output.hidden_states[-1], output.hidden_states[-7]),
-    dim=2
-)
-print(output)
+def _getEntities(text: str, labels: List[str]) -> List[str]:
+    _labels = [label.lower() for label in labels]
+    entities = model.predict_entities(text, _labels)
+    return entities
 
 
-# single emb: for better speed
-# emb = output.hidden_states[-1]
+def _merge_entities(text:str, entities):
+    if not entities:
+        return []
+    merged = []
+    current = entities[0]
+    for next_entity in entities[1:]:
+        if next_entity["label"] == current["label"] and (
+            next_entity["start"] == current["end"] + 1
+            or next_entity["start"] == current["end"]
+        ):
+            current["text"] = text[current["start"] : next_entity["end"]].strip()
+            current["end"] = next_entity["end"]
+        else:
+            merged.append(current)
+            current = next_entity
+    # Append the last entity
+    merged.append(current)
+    output = [{'text': item['text'], 'score': item['score']} for item in merged]
+    return output
+
+async def main():
+    text = "red and green and magenta on the grass"
+    labels = ["color", "noun"]
+    entities = _getEntities(text, labels=labels)
+    tokens = _merge_entities(text, entities)
+    log.info(f"{tokens}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
