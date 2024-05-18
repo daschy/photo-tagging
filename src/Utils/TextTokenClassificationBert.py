@@ -5,7 +5,7 @@ from typing import List
 from transformers import (
     pipeline,
 )
-from Token import Token
+from .Token import Token
 from enum import Enum
 
 log = GetLogger(__name__)
