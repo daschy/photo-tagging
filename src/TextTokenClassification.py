@@ -11,11 +11,13 @@ log.debug("End init AI")
 
 def _getEntities(text: str, labels: List[str]) -> List[str]:
     _labels = [label.lower() for label in labels]
-    entities = model.predict_entities(text, _labels)
+    entities = model.predict_entities(
+        text=text, labels=_labels, multi_label=False, threshold=0.5
+    )
     return entities
 
 
-def _merge_entities(text:str, entities):
+def _merge_entities(text: str, entities):
     if not entities:
         return []
     merged = []
@@ -32,15 +34,24 @@ def _merge_entities(text:str, entities):
             current = next_entity
     # Append the last entity
     merged.append(current)
-    output = [{'text': item['text'], 'score': item['score']} for item in merged]
+    output = [{"text": item["text"], "score": item["score"]} for item in merged]
     return output
 
+
 async def main():
-    text = "red and green and magenta on the grass"
-    labels = ["color", "noun"]
+    text = "A man sits on a blanket in a park, basking in the clear blue sky. The park is filled with people, some lounging on blankets, others riding bikes. The man has long hair and is wearing sunglasses and a black jacket. A red"
+    labels = ["object", "person"]
     entities = _getEntities(text, labels=labels)
-    tokens = _merge_entities(text, entities)
-    log.info(f"{tokens}")
+    log.info(f"entities {[entity['text'] for entity in entities]}")
+    # tokens = _merge_entities(text, entities)
+    # log.info(f"merged {[token['text'] for token in tokens]}")
+    text = "brown white and Jack"
+    labels = ["color"]
+    entities = _getEntities(text, labels=labels)
+    log.info(f"entities {[entity['text'] for entity in entities]}")
+    # tokens = _merge_entities(text, entities)
+    # log.info(f"merged {[token['text'] for token in tokens]}")
+    
 
 
 if __name__ == "__main__":
