@@ -5,7 +5,7 @@ from typing import List
 from transformers import (
     pipeline,
 )
-from .Token import Token
+from Token import Token
 from enum import Enum
 
 log = GetLogger(__name__)
@@ -32,7 +32,7 @@ async def textToTokens(text: str, label: LABELS) -> List[Token]:
     with ThreadPoolExecutor() as pool:
         tokens = await loop.run_in_executor(
             pool,
-            lambda: token_classifier(text),
+            lambda:  token_classifier(text),
         )
         output = [
             Token(text=token["word"], score=token["score"], label=["entity_group"])
@@ -45,8 +45,6 @@ async def textToTokens(text: str, label: LABELS) -> List[Token]:
 
 async def main():
     text = "black white A man sits on a blanket in a park, basking in the clear blue sky. The park is filled with people, some lounging on blankets, others riding bikes. The man has long hair and is wearing sunglasses and a black jacket. A red"
-    # tokens = await captionToTokens(text, LABELS.ADJ)
-    # tokens = await captionToTokens(text, LABELS.NOUN)
     tokensAll = await asyncio.gather(
         textToTokens(text, LABELS.ADJ), textToTokens(text, LABELS.NOUN)
     )
