@@ -19,6 +19,7 @@ async def main():
     images = [
         people_park_smoking,  # //ZDS_1759.NEF
         people_biking,  # //ZDS_2610.NEF
+        nature_flower,  # //ZDS_1788.NEF
         nature_dog,  # //ZDS_2276.NEF
         nature_mushroom,  # //ZDS_1780.NEF
         nature_woods,  # //ZDS_2322.NEF
