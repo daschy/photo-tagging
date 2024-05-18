@@ -4,14 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from typing import List
 from transformers import (
     AutoProcessor,
-    AutoTokenizer,
-    AutoImageProcessor,
-    AutoModelForCausalLM,
-    BlipForConditionalGeneration,
-    VisionEncoderDecoderModel,
     PaliGemmaForConditionalGeneration,
-    CLIPProcessor,
-    CLIPModel,
     pipeline,
 )
 
@@ -24,45 +17,6 @@ from Models.AI import AI
 log = GetLogger(__name__)
 
 log.debug("Start init AI")
-# git_base = AI(
-#     processor=AutoProcessor.from_pretrained("microsoft/git-base-coco"),
-#     model=AutoModelForCausalLM.from_pretrained("microsoft/git-base-coco"),
-# )
-
-# git_large = AI(
-#     processor=AutoProcessor.from_pretrained("microsoft/git-large-coco"),
-#     model=AutoModelForCausalLM.from_pretrained("microsoft/git-large-coco"),
-# )
-
-# blip_base = AI(
-#     processor=AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-base"),
-#     model=BlipForConditionalGeneration.from_pretrained(
-#         "Salesforce/blip-image-captioning-base"
-#     ),
-# )
-
-# blip_large = AI(
-#     processor=AutoProcessor.from_pretrained("Salesforce/blip-image-captioning-large"),
-#     model=BlipForConditionalGeneration.from_pretrained(
-#         "Salesforce/blip-image-captioning-large"
-#     ),
-# )
-
-# vitgpt = AI(
-#     processor=AutoImageProcessor.from_pretrained(
-#         "nlpconnect/vit-gpt2-image-captioning"
-#     ),
-#     model=VisionEncoderDecoderModel.from_pretrained(
-#         "nlpconnect/vit-gpt2-image-captioning"
-#     ),
-#     tokenizer=AutoTokenizer.from_pretrained("nlpconnect/vit-gpt2-image-captioning"),
-# )
-
-# clip_large = AI(
-#     model=CLIPModel.from_pretrained("openai/clip-vit-large-patch14"),
-#     processor=CLIPProcessor.from_pretrained("openai/clip-vit-large-patch14"),
-# )
-
 paligemma = AI(
     model=PaliGemmaForConditionalGeneration.from_pretrained(
         "google/paligemma-3b-mix-448"
