@@ -31,11 +31,11 @@ async def execute(db, image_path) -> List[str]:
 async def main():
     images = [
         Images.people_park_smoking,  # //ZDS_1759.NEF
-        Images.people_biking,  # //ZDS_2610.NEF
-        Images.nature_flower,  # //ZDS_1788.NEF
-        Images.nature_dog,  # //ZDS_2276.NEF
-        Images.nature_mushroom,  # //ZDS_1780.NEF
-        Images.nature_woods,  # //ZDS_2322.NEF
+        # Images.people_biking,  # //ZDS_2610.NEF
+        # Images.nature_flower,  # //ZDS_1788.NEF
+        # Images.nature_dog,  # //ZDS_2276.NEF
+        # Images.nature_mushroom,  # //ZDS_1780.NEF
+        # Images.nature_woods,  # //ZDS_2322.NEF
     ]
     await init_db()
     async with AsyncSessionLocal() as db:

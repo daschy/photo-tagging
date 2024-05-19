@@ -55,11 +55,3 @@ class CRUDBase(Generic[T]):
         await db.delete(obj)
         await db.commit()
 
-    async def upsert_by(self, db: AsyncSession, obj_in: T, **kwargs) -> T:
-        existing_obj = await self.get_by(db, **kwargs)
-        if existing_obj:
-            return await self.update(db, id=existing_obj.id, obj_in=obj_in)
-        else:
-            for key, value in kwargs.items():
-                setattr(obj_in, key, value)
-            return await self._create(db, obj_in=obj_in)
