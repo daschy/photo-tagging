@@ -9,6 +9,6 @@
             "cwd": "${fileDirname}",
             "console": "integratedTerminal",
          
-        }
+        } 
     ]
 }
