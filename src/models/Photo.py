@@ -1,20 +1,35 @@
 from typing import List
+import uuid
+from datetime import datetime
+import pytz
 from Models.Base import Base
+from Models.BaseOrm import BaseOrm
+from sqlalchemy import Column, UUID, String, JSON, DateTime
 
 
-class Photo(Base):
-    def __init__(self, path, keywords: List[str] | None):
+class Photo(Base, BaseOrm):
+    __tablename__ = "Photos"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    path = Column(String, nullable=True, unique=True)
+    filename = Column(String, nullable=True)
+    keywordList = Column(JSON, nullable=True)
+    createdAt = Column(DateTime, default=datetime.now(pytz.UTC))
+    updatedAt = Column(
+        DateTime, default=datetime.now(pytz.UTC), onupdate=datetime.now(pytz.UTC)
+    )
+
+    def __init__(self, path: str):
         self.path = path
-        self.keywords: List[str] = keywords | []
+        self.keywordList = []
+        self.filename = path.split("/")[-1]
 
-    def __str__(self):
-        attributes = [f"{key}: {value}" for key, value in self.__dict__.items()]
-        return ", ".join(attributes)
-
-    def addKeywords(self, keyword: str | List[str]):
-        if isinstance(keyword, str):
-            self.keywords.append(keyword)
-        elif isinstance(keyword, List[str]):
-            self.keywords.extend(keyword)
+    def addKeywordList(self, keywordOrList: str | List[str]):
+        if isinstance(keywordOrList, str):
+            self.keywordList.append(keywordOrList)
+        elif isinstance(keywordOrList, List):
+            self.keywordList.extend(keywordOrList)
         else:
             raise TypeError("Input must be a string or a list of strings")
+
+    def setKeywordList(self, keywordList: List[str]):
+        self.keywordList = keywordList

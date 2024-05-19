@@ -4,15 +4,28 @@ from typing import List
 from ImageToText import generateCaptionTags
 from ImageToReverseGeoTagging import generateReverseGeoTags
 from Utils import Images
+from Models.Photo import Photo
+from Utils.DbUtils import init_db, AsyncSessionLocal
+from Models.CrudBase import CRUDBase
 
 
-async def execute(image_path) -> List[str]:
-    featureTags: List[List[str]] = await asyncio.gather(
+async def execute(db, image_path) -> List[str]:
+    featureKeywordList: List[List[str]] = await asyncio.gather(
         generateCaptionTags(image_path), generateReverseGeoTags(image_path)
     )
-
-    outputTags: List[str] = list(set(featureTags[0] + featureTags[1]))
-    return outputTags
+    outputKeywordList: List[str] = list(
+        set(featureKeywordList[0] + featureKeywordList[1])
+    )
+    photo_crud = CRUDBase(Photo)
+    retrievedPhoto = await photo_crud.get_by(db, path=image_path)
+    if retrievedPhoto is None:
+        newPhoto = Photo(image_path)
+        newPhoto.addKeywordList(outputKeywordList)
+        await photo_crud.create(db, newPhoto)
+    else:
+        retrievedPhoto.setKeywordList(outputKeywordList)
+        await photo_crud.update(db, retrievedPhoto.id, retrievedPhoto)
+    return outputKeywordList
 
 
 async def main():
@@ -24,10 +37,13 @@ async def main():
         Images.nature_mushroom,  # //ZDS_1780.NEF
         Images.nature_woods,  # //ZDS_2322.NEF
     ]
-    keywords = await asyncio.gather(*([execute(img) for img in images]))
-    for idx, image_path in enumerate(images):
-        tagList = keywords[idx]
-        log.info(f"{image_path}: {tagList}")
+    await init_db()
+    async with AsyncSessionLocal() as db:
+        keywords = await asyncio.gather(*([execute(db, img) for img in images]))
+
+        for idx, image_path in enumerate(images):
+            tagList = keywords[idx]
+            log.info(f"{image_path}: {tagList}")
 
 
 if __name__ == "__main__":
