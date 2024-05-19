@@ -1,4 +1,4 @@
-from Utils.LoggerUtils import GetLogger
+from Logger.LoggerUtils import GetLogger
 import asyncio
 from typing import List
 from ImageToText import generateCaptionTags

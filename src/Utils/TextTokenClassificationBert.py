@@ -1,4 +1,4 @@
-from .LoggerUtils import GetLogger
+from Logger.LoggerUtils import GetLogger
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
