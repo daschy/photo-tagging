@@ -1,4 +1,6 @@
-class Location:
+from Models.Base import Base
+
+class Location(Base):
     def __init__(self):
         self.city = None
         self.state = None

@@ -1,19 +1,20 @@
 from typing import List
+from Models.Base import Base
 
-class Photo:
-    def __init__(self, path, fingerprint, keywords: List[str] | None):
+
+class Photo(Base):
+    def __init__(self, path, keywords: List[str] | None):
         self.path = path
         self.keywords: List[str] = keywords | []
-        self.fingerprint = fingerprint
 
     def __str__(self):
         attributes = [f"{key}: {value}" for key, value in self.__dict__.items()]
         return ", ".join(attributes)
 
-    def addKeywords(self, elements: str | List[str]):
-        if isinstance(elements, str):
-            self.keywords.append(elements)
-        elif isinstance(elements, List[str]):
-            self.keywords.extend(elements)
+    def addKeywords(self, keyword: str | List[str]):
+        if isinstance(keyword, str):
+            self.keywords.append(keyword)
+        elif isinstance(keyword, List[str]):
+            self.keywords.extend(keyword)
         else:
             raise TypeError("Input must be a string or a list of strings")
