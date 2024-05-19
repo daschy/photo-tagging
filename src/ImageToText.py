@@ -9,11 +9,10 @@ from transformers import (
 )
 
 from PIL import Image
-
-from Models.Caption import Caption
+from Models.Token import Token
 from Models.AI import AI
-from Utils.TextTokenClassificationBert import textToTokens, LABELS
-from Utils.Token import Token
+from Models.Caption import Caption
+from Utils import TextTokenClassificationBert
 
 
 log = GetLogger(__name__)
@@ -88,8 +87,8 @@ async def _generateKeywordList(image: Image) -> List[str]:
     log.debug("End generate caption list " + (image.filename).split("/")[-1])
     log.debug("Start tokenize caption list " + (image.filename).split("/")[-1])
     tokenList: List[Token] = await asyncio.gather(
-        textToTokens(captionList[0].text, LABELS.NOUN),
-        textToTokens(captionList[1].text, LABELS.ADJ),
+        TextTokenClassificationBert.textToTokens(captionList[0].text, TextTokenClassificationBert.LABELS.NOUN),
+        TextTokenClassificationBert.textToTokens(captionList[1].text, TextTokenClassificationBert.LABELS.ADJ),
     )
     log.debug("End tokenize caption list " + (image.filename).split("/")[-1])
     output = list(

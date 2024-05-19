@@ -1,10 +1,10 @@
 from gliner import GLiNER
 from typing import List
-from .LoggerUtils import GetLogger
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
  
-from Token import Token
+from src.Utils.LoggerUtils import GetLogger
+from src.Models.Token import Token
 
 log = GetLogger(__name__)
 log.debug("Start init AI")

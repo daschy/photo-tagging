@@ -3,7 +3,7 @@ import asyncio
 from typing import List
 from ImageToText import generateCaptionTags
 from ImageToReverseGeoTagging import generateReverseGeoTags
-from Utils.Images import *
+from Utils import Images
 
 
 async def execute(image_path) -> List[str]:
@@ -17,12 +17,12 @@ async def execute(image_path) -> List[str]:
 
 async def main():
     images = [
-        people_park_smoking,  # //ZDS_1759.NEF
-        people_biking,  # //ZDS_2610.NEF
-        nature_flower,  # //ZDS_1788.NEF
-        nature_dog,  # //ZDS_2276.NEF
-        nature_mushroom,  # //ZDS_1780.NEF
-        nature_woods,  # //ZDS_2322.NEF
+        Images.people_park_smoking,  # //ZDS_1759.NEF
+        Images.people_biking,  # //ZDS_2610.NEF
+        Images.nature_flower,  # //ZDS_1788.NEF
+        Images.nature_dog,  # //ZDS_2276.NEF
+        Images.nature_mushroom,  # //ZDS_1780.NEF
+        Images.nature_woods,  # //ZDS_2322.NEF
     ]
     keywords = await asyncio.gather(*([execute(img) for img in images]))
     for idx, image_path in enumerate(images):

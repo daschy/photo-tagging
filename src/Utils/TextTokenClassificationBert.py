@@ -5,7 +5,7 @@ from typing import List
 from transformers import (
     pipeline,
 )
-from .Token import Token
+from Models.Token import Token
 from enum import Enum
 
 log = GetLogger(__name__)
@@ -53,4 +53,5 @@ async def main():
 
 
 if __name__ == "__main__":
+    import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__)))
     asyncio.run(main())
