@@ -9,6 +9,7 @@ from Utils.DbUtils import init_db, AsyncSessionLocal
 from Models.CrudBase import CRUDBase
 
 
+
 async def execute(db, image_path) -> List[str]:
     featureKeywordList: List[List[str]] = await asyncio.gather(
         generateCaptionTags(image_path), generateReverseGeoTags(image_path)
