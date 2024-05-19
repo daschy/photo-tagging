@@ -7,5 +7,3 @@ prettyprinter==0.18.0
 Requests==2.31.0
 torch==2.3.0
 transformers==4.41.0
-# transformers==4.40.2
-# git+https://github.com/huggingface/transformers.git 
