@@ -1,5 +1,5 @@
 import pytest
-from utils.image_to_reverse_geo_tagging import (
+from src.utils.image_to_reverse_geo_tagging import (
   generate_reverse_geo_tags,
 )
 

@@ -32,7 +32,7 @@ def get_logger(name: str):
       "tensorboard",
       "wandb",
       "gliner",
-      # "sqlalchemy",
+      "sqlalchemy",
     ],
   )
   log = logging.getLogger(name)
