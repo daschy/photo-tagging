@@ -7,7 +7,7 @@ from src.Models.Base import Base
 from src.Models.BaseOrm import BaseOrm
 
 
-class Photo(Base, BaseOrm):
+class Photo(BaseOrm, Base):
   __tablename__ = "photos"
   id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
   path = Column(String, nullable=True, unique=True)
