@@ -3,14 +3,14 @@ from typing import List
 
 from ImageToText import generate_caption_tags
 from ImageToReverseGeoTagging import generate_reverse_geo_tags
-from Logger.LoggerUtils import GetLogger
+from Logger.logger_utils import get_logger
 from Models.Photo import Photo
 from Models.CrudBase import CRUDBase
 from utils import Images
 from utils.DbUtils import init_db, AsyncSessionLocal
 
 
-log = GetLogger(__name__)
+log = get_logger(__name__)
 
 
 async def execute(db, image_path) -> List[str]:
@@ -61,5 +61,5 @@ async def main():
 
 
 if __name__ == "__main__":
-  log = GetLogger(__name__)
+  log = get_logger(__name__)
   asyncio.run(main())

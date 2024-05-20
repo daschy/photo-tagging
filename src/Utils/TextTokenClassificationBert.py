@@ -5,10 +5,10 @@ from transformers import (
   pipeline,
 )
 from enum import Enum
-from src.Logger.LoggerUtils import GetLogger
+from Logger.logger_utils import get_logger
 from src.Models.Token import Token
 
-log = GetLogger(__name__)
+log = get_logger(__name__)
 log.debug("Start init AI")
 
 

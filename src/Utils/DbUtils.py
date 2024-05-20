@@ -2,9 +2,9 @@ import os
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from Models.BaseOrm import BaseOrm
-from Logger.LoggerUtils import GetLogger
+from Logger.logger_utils import get_logger
 
-log = GetLogger(__name__)
+log = get_logger(__name__)
 
 # SQLite connection
 DATABASE_URL = os.environ.get("DATABASE_URL")

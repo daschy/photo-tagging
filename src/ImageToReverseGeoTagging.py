@@ -3,9 +3,9 @@ from typing import List
 from geopy.geocoders import Nominatim
 
 from src.Models.Location import Location
-from src.Logger.LoggerUtils import GetLogger
+from Logger.logger_utils import get_logger
 
-log = GetLogger(__name__)
+log = get_logger(__name__)
 
 
 def _get_gps_coordinates(image_path):
