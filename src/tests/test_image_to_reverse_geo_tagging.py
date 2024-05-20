@@ -1,3 +1,4 @@
+import os
 import pytest
 from src.utils.image_to_reverse_geo_tagging import (
   generate_reverse_geo_tags,
@@ -5,11 +6,9 @@ from src.utils.image_to_reverse_geo_tagging import (
 
 
 @pytest.mark.asyncio
-async def TestGenerateReverseGeoTagsNoGps():
-  # Call the generateReverseGeoTags function
-  result = await generate_reverse_geo_tags(
-    "./test_images/person_walking_gps.NEF"
-  )
+async def test_GenerateReverseGeoTagsNoGps():
+  # Call the generateReverseGeoTags function 
+  result = await generate_reverse_geo_tags(f"{os.getcwd()}/src/tests/test_images/person_biking_no_gps.NEF")
 
   # Verify the result
   assert result == []
@@ -18,14 +17,12 @@ async def TestGenerateReverseGeoTagsNoGps():
 
 
 @pytest.mark.asyncio
-async def TestGenerateReverseGeoTagsGpsValues():
+async def test_GenerateReverseGeoTagsGpsValues():
   # Call the generateReverseGeoTags function
-  result = await generate_reverse_geo_tags(
-    "./test_images/person_biking_no_gps.NEF"
-  )
+  result = await generate_reverse_geo_tags(f"{os.getcwd()}/src/tests/test_images/person_walking_gps.NEF")
 
   # Verify the result
-  assert result == ["Netherlands", "Amsterdam", "Vondelpark"]
+  assert result == ["Netherlands", "Amsterdam", "Nachtwachtlaan"]
 
 
 # If this script is executed directly, run pytest
