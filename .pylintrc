@@ -129,8 +129,10 @@ disable=R,
         wrong-import-order,
         xrange-builtin,
         zip-builtin-not-iterating,
+        #custom
         logging-not-lazy,
-        logging-fstring-interpolation
+        logging-fstring-interpolation,
+        missing-module-docstring
 
 
 [REPORTS]

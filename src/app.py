@@ -1,5 +1,3 @@
-"""app.py"""
-
 import asyncio
 from typing import List
 
@@ -8,8 +6,8 @@ from ImageToReverseGeoTagging import generate_reverse_geo_tags
 from Logger.LoggerUtils import GetLogger
 from Models.Photo import Photo
 from Models.CrudBase import CRUDBase
-from Utils import Images
-from Utils.DbUtils import init_db, AsyncSessionLocal
+from utils import Images
+from utils.DbUtils import init_db, AsyncSessionLocal
 
 
 log = GetLogger(__name__)
