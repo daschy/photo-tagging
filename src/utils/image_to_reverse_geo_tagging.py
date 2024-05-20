@@ -58,7 +58,7 @@ def _reverse_geotag(latitude, longitude):
     return None
 
 
-async def generate_reverse_geo_tags(image_path) -> List[str]:
+async def generate_reverse_geotag(image_path) -> List[str]:
   lat, long = _get_gps_coordinates(image_path=image_path)
   log.debug(f"{image_path}: lat={lat},long={long}")
   if lat is None or long is None:

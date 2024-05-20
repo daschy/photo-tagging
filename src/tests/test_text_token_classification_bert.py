@@ -8,7 +8,7 @@ from src.tests.test_utils.assert_lists_of_objects_equal_ignore_attr import (
 
 # Using pytest's mark.asyncio to run async test cases
 @pytest.mark.asyncio
-async def TestTextToTokenList():
+async def test_text_to_token_list():
   text = "black and white canvas"
 
   # Assertions for ADJ

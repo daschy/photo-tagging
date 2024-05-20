@@ -3,8 +3,8 @@ from typing import List
 
 from models.Photo import Photo
 from models.CrudBase import CRUDBase
-from src.utils.image_to_text import generate_caption_keyword_list
-from src.utils.image_to_reverse_geo_tagging import generate_reverse_geo_tags
+from utils.image_to_keyword_list import generate_keyword_list
+from src.utils.image_to_reverse_geo_tagging import generate_reverse_geotag
 from src.utils.logger_utils import get_logger
 from src.utils.db_utils import init_db, AsyncSessionLocal
 from src.utils import images_list
@@ -19,7 +19,7 @@ async def execute(db, image_path) -> List[str]:
   image_keyword_list = []
   if retrieved_photo is None:
     feature_keyword_list: List[List[str]] = await asyncio.gather(
-      generate_caption_keyword_list(image_path), generate_reverse_geo_tags(image_path)
+      generate_keyword_list(image_path), generate_reverse_geotag(image_path)
     )
     image_keyword_list: List[str] = sorted(
       list(set(feature_keyword_list[0] + feature_keyword_list[1]))
