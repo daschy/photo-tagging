@@ -3,7 +3,7 @@ from typing import List
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
  
-from utils.logger_utils import get_logger
+from src.utils.logger_utils import get_logger
 from src.models.Token import Token
 
 log = get_logger(__name__)
