@@ -8,7 +8,7 @@ from src.utils.image_to_reverse_geo_tagging import (
 async def TestGenerateReverseGeoTagsNoGps():
   # Call the generateReverseGeoTags function
   result = await generate_reverse_geo_tags(
-    "./src/__tests__/test_images/person_walking_gps.NEF"
+    "./test_images/person_walking_gps.NEF"
   )
 
   # Verify the result
@@ -21,7 +21,7 @@ async def TestGenerateReverseGeoTagsNoGps():
 async def TestGenerateReverseGeoTagsGpsValues():
   # Call the generateReverseGeoTags function
   result = await generate_reverse_geo_tags(
-    "./src/__tests__/test_images/person_biking_no_gps.NEF"
+    "./test_images/person_biking_no_gps.NEF"
   )
 
   # Verify the result
