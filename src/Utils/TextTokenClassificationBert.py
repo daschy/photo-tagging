@@ -35,7 +35,7 @@ async def TextToTokenList(text: str, label: LABELS) -> List[Token]:
       lambda: token_classifier(text),
     )
     output = [
-      Token(text=token["word"], score=token["score"], label=["entity_group"])
+      Token(text=token["word"], score=token["score"], label=token["entity_group"])
       for token in tokens
       if token["entity_group"] == (label.value)
     ]
