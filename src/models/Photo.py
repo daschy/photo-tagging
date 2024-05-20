@@ -2,13 +2,13 @@ from typing import List
 import uuid
 from datetime import datetime
 import pytz
+from src.Models.BaseOrm import BaseOrm
 from sqlalchemy import Column, UUID, String, JSON, DateTime
 from src.Models.Base import Base
-from src.Models.BaseOrm import BaseOrm
 
 
-class Photo(BaseOrm, Base):
-  __tablename__ = "photos"
+class Photo(Base, BaseOrm):
+  __tablename__ = "Photos"
   id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
   path = Column(String, nullable=True, unique=True)
   filename = Column(String, nullable=True)

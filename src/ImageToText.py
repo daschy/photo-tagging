@@ -12,7 +12,7 @@ from Logger.logger_utils import get_logger
 from src.Models.Token import Token
 from src.Models.AI import AI
 from src.Models.Caption import Caption
-from src.utils import TextTokenClassificationBert
+from src.util import TextTokenClassificationBert
 
 
 log = get_logger(__name__)

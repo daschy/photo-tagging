@@ -1,8 +1,8 @@
 import os
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from Models.BaseOrm import BaseOrm
-from Logger.logger_utils import get_logger
+from src.Models.BaseOrm import BaseOrm
+from src.Logger.logger_utils import get_logger
 
 log = get_logger(__name__)
 
