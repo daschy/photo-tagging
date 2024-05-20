@@ -12,7 +12,7 @@ from Logger.logger_utils import get_logger
 from src.Models.Token import Token
 from src.Models.AI import AI
 from src.Models.Caption import Caption
-from src.util import TextTokenClassificationBert
+from util import text_token_classification_bert
 
 
 log = get_logger(__name__)
@@ -85,11 +85,11 @@ async def _generate_keyword_list(image: Image) -> List[str]:
   log.debug("End generate caption list " + (image.filename).split("/")[-1])
   log.debug("Start tokenize caption list " + (image.filename).split("/")[-1])
   tokenList: List[Token] = await asyncio.gather(
-    TextTokenClassificationBert.TextToTokenList(
-      caption_list[0].text, TextTokenClassificationBert.LABELS.NOUN
+    text_token_classification_bert.TextToTokenList(
+      caption_list[0].text, text_token_classification_bert.LABELS.NOUN
     ),
-    TextTokenClassificationBert.TextToTokenList(
-      caption_list[1].text, TextTokenClassificationBert.LABELS.ADJ
+    text_token_classification_bert.TextToTokenList(
+      caption_list[1].text, text_token_classification_bert.LABELS.ADJ
     ),
   )
   log.debug("End tokenize caption list " + (image.filename).split("/")[-1])
