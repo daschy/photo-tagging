@@ -14,22 +14,22 @@ log = get_logger(__name__)
 
 
 async def execute(db, image_path) -> List[str]:
-  feature_keyword_list: List[List[str]] = await asyncio.gather(
-    generate_caption_tags(image_path), generate_reverse_geo_tags(image_path)
-  )
-  output_keyword_list: List[str] = list(
-    set(feature_keyword_list[0] + feature_keyword_list[1])
-  )
   photo_crud = CRUDBase(Photo)
   retrieved_photo = await photo_crud.get_by(db, path=image_path)
+  image_keyword_list = []
   if retrieved_photo is None:
+    feature_keyword_list: List[List[str]] = await asyncio.gather(
+      generate_caption_tags(image_path), generate_reverse_geo_tags(image_path)
+    )
+    image_keyword_list: List[str] = list(
+      set(feature_keyword_list[0] + feature_keyword_list[1])
+    )
     new_photo = Photo(image_path)
-    new_photo.addKeywordList(output_keyword_list)
+    new_photo.addKeywordList(image_keyword_list)
     await photo_crud.create(db, new_photo)
   else:
-    retrieved_photo.setKeywordList(output_keyword_list)
-    await photo_crud.update(db, retrieved_photo.id, retrieved_photo)
-  return output_keyword_list
+    image_keyword_list = retrieved_photo.keywordList
+  return image_keyword_list
 
 
 async def main():

@@ -132,7 +132,8 @@ disable=R,
         #custom
         logging-not-lazy,
         logging-fstring-interpolation,
-        missing-module-docstring
+        missing-module-docstring,
+        missing-class-docstring
 
 
 [REPORTS]
