@@ -87,8 +87,8 @@ async def _generateKeywordList(image: Image) -> List[str]:
     log.debug("End generate caption list " + (image.filename).split("/")[-1])
     log.debug("Start tokenize caption list " + (image.filename).split("/")[-1])
     tokenList: List[Token] = await asyncio.gather(
-        TextTokenClassificationBert.text_to_tokenList(captionList[0].text, TextTokenClassificationBert.LABELS.NOUN),
-        TextTokenClassificationBert.text_to_tokenList(captionList[1].text, TextTokenClassificationBert.LABELS.ADJ),
+        TextTokenClassificationBert.TextToTokenList(captionList[0].text, TextTokenClassificationBert.LABELS.NOUN),
+        TextTokenClassificationBert.TextToTokenList(captionList[1].text, TextTokenClassificationBert.LABELS.ADJ),
     )
     log.debug("End tokenize caption list " + (image.filename).split("/")[-1])
     output = list(
