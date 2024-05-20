@@ -7,7 +7,7 @@ from Logger.logger_utils import get_logger
 from Models.Photo import Photo
 from Models.CrudBase import CRUDBase
 from utils import Images
-from utils.DbUtils import init_db, AsyncSessionLocal
+from utils.db_utils import init_db, AsyncSessionLocal
 
 
 log = get_logger(__name__)

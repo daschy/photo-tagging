@@ -8,7 +8,7 @@ from src.Models.BaseOrm import BaseOrm
 
 
 class Photo(Base, BaseOrm):
-  __tablename__ = "Photos"
+  __tablename__ = "photos"
   id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
   path = Column(String, nullable=True, unique=True)
   filename = Column(String, nullable=True)

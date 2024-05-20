@@ -5,7 +5,7 @@ from transformers import (
   pipeline,
 )
 from enum import Enum
-from Logger.logger_utils import get_logger
+from src.Logger.logger_utils import get_logger
 from src.Models.Token import Token
 
 log = get_logger(__name__)
