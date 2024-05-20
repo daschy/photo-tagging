@@ -26,7 +26,7 @@ class LABELS(Enum):
     ADJ = "ADJ"
 
 
-async def textToTokens(text: str, label: LABELS) -> List[Token]:
+async def text_to_tokenList(text: str, label: LABELS) -> List[Token]:
     loop = asyncio.get_running_loop()
     log.debug(f"Start tokenization {label.value}")
     with ThreadPoolExecutor() as pool:
@@ -46,7 +46,7 @@ async def textToTokens(text: str, label: LABELS) -> List[Token]:
 async def main():
     text = "black white A man sits on a blanket in a park, basking in the clear blue sky. The park is filled with people, some lounging on blankets, others riding bikes. The man has long hair and is wearing sunglasses and a black jacket. A red"
     tokensAll = await asyncio.gather(
-        textToTokens(text, LABELS.ADJ), textToTokens(text, LABELS.NOUN)
+        text_to_tokenList(text, LABELS.ADJ), text_to_tokenList(text, LABELS.NOUN)
     )
     log.debug(f"{[token.text for token in tokensAll[0]]}")
     log.debug(f"{[token.text for token in tokensAll[1]]}")
