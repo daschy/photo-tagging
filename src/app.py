@@ -10,7 +10,6 @@ from src.utils.db_utils import init_db, AsyncSessionLocal
 from src.utils import images_list
 
 
-
 log = get_logger(__name__)
 
 
@@ -22,10 +21,9 @@ async def execute(db, image_path) -> List[str]:
     feature_keyword_list: List[List[str]] = await asyncio.gather(
       generate_caption_keyword_list(image_path), generate_reverse_geo_tags(image_path)
     )
-    image_keyword_list: List[str] = list(
-      set(feature_keyword_list[0] + feature_keyword_list[1])
+    image_keyword_list: List[str] = sorted(
+      list(set(feature_keyword_list[0] + feature_keyword_list[1]))
     )
-    image_keyword_list.sort()
     new_photo = Photo(image_path)
     new_photo.add_keyword_list(image_keyword_list)
     await photo_crud.create(db, new_photo)
