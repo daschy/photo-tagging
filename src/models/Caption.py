@@ -1,4 +1,4 @@
-from Models_.Base import Base
+from models.Base import Base
 
 
 class Caption(Base):

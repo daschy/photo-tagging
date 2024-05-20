@@ -1,4 +1,4 @@
-from src.Models_.Base import Base
+from src.models.Base import Base
 
 class Token(Base):
     def __init__(self, text, score, label):

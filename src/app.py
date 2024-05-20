@@ -3,9 +3,9 @@ from typing import List
 
 from ImageToText import generate_caption_tags
 from ImageToReverseGeoTagging import generate_reverse_geo_tags
-from Logger.logger_utils import get_logger
-from Models_.Photo import Photo
-from Models_.CrudBase import CRUDBase
+from utils.logger_utils import get_logger
+from models.Photo import Photo
+from models.CrudBase import CRUDBase
 from utils import images_list
 from utils.db_utils import init_db, AsyncSessionLocal
 

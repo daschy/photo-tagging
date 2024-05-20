@@ -8,10 +8,10 @@ from transformers import (
 )
 
 from PIL import Image
-from Logger.logger_utils import get_logger
-from src.Models_.Token import Token
-from src.Models_.AI import AI
-from src.Models_.Caption import Caption
+from utils.logger_utils import get_logger
+from src.models.Token import Token
+from src.models.AI import AI
+from src.models.Caption import Caption
 from utils import text_token_classification_bert
 
 

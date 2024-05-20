@@ -1,5 +1,5 @@
 import torch
-from src.Models_.Base import Base
+from src.models.Base import Base
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
