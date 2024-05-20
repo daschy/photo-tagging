@@ -1,4 +1,4 @@
-from Models.Base import Base
+from src.Models.Base import Base
 
 class Location(Base):
     def __init__(self):

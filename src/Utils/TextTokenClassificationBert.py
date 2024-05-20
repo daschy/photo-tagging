@@ -1,11 +1,11 @@
-from Logger.LoggerUtils import GetLogger
+from src.Logger.LoggerUtils import GetLogger
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
 from transformers import (
     pipeline,
 )
-from Models.Token import Token
+from src.Models.Token import Token
 from enum import Enum
 
 log = GetLogger(__name__)
@@ -53,5 +53,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    import os, sys; sys.path.append(os.path.dirname(os.path.realpath(__file__)))
     asyncio.run(main())

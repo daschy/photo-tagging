@@ -1,4 +1,3 @@
-from Logger.LoggerUtils import GetLogger
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from typing import List
@@ -9,10 +8,11 @@ from transformers import (
 )
 
 from PIL import Image
-from Models.Token import Token
-from Models.AI import AI
-from Models.Caption import Caption
-from Utils import TextTokenClassificationBert
+from src.Logger.LoggerUtils import GetLogger
+from src.Models.Token import Token
+from src.Models.AI import AI
+from src.Models.Caption import Caption
+from src.Utils import TextTokenClassificationBert
 
 
 log = GetLogger(__name__)

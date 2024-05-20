@@ -2,9 +2,9 @@ from typing import List
 import uuid
 from datetime import datetime
 import pytz
-from Models.Base import Base
-from Models.BaseOrm import BaseOrm
 from sqlalchemy import Column, UUID, String, JSON, DateTime
+from src.Models.Base import Base
+from src.Models.BaseOrm import BaseOrm
 
 
 class Photo(Base, BaseOrm):
