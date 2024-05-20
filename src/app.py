@@ -25,10 +25,10 @@ async def execute(db, image_path) -> List[str]:
       set(feature_keyword_list[0] + feature_keyword_list[1])
     )
     new_photo = Photo(image_path)
-    new_photo.addKeywordList(image_keyword_list)
+    new_photo.add_keyword_list(image_keyword_list)
     await photo_crud.create(db, new_photo)
   else:
-    image_keyword_list = retrieved_photo.keywordList
+    image_keyword_list = retrieved_photo.keyword_list
   return image_keyword_list
 
 
@@ -53,7 +53,7 @@ async def main():
           *([execute(db, img) for img in image_paths])
         )
       else:
-        keyword_list.append(retrieved_photo.keywordList)
+        keyword_list.append(retrieved_photo.keyword_list)
 
     for idx, image_path in enumerate(image_paths):
       tag_list = keyword_list[idx]
