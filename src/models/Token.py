@@ -1,4 +1,6 @@
-class Token:
+from Models.Base import Base
+
+class Token(Base):
     def __init__(self, text, score, label):
         self.text = text
         self.score = score

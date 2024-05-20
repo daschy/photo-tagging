@@ -1,4 +1,3 @@
-import transformers, torch
 import logging
 import coloredlogs
 import re
@@ -25,7 +24,7 @@ def _set_global_logging_level(level=logging.ERROR, prefices=[""]):
 def GetLogger(name: str):
     _set_global_logging_level(
         logging.ERROR,
-        ["transformers", "nlp", "torch", "tensorflow", "tensorboard", "wandb", "gliner"],
+        ["transformers", "nlp", "torch", "tensorflow", "tensorboard", "wandb", "gliner", "sqlalchemy"],
     )
     log = logging.getLogger(name)
     level = logging.DEBUG

@@ -3,7 +3,7 @@ from typing import List
 from geopy.geocoders import Nominatim
 
 from Models.Location import Location
-from src.Logger.LoggerUtils import GetLogger
+from Logger.LoggerUtils import GetLogger
 
 log = GetLogger(__name__)
 

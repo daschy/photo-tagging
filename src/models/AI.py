@@ -1,8 +1,9 @@
 import torch
+from Models.Base import Base
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-class AI:
+class AI(Base):
     def __init__(self, processor, model, tokenizer=None):
         self.processor = processor
         self.model = model
