@@ -4,10 +4,10 @@ from typing import List
 from ImageToText import generate_caption_tags
 from ImageToReverseGeoTagging import generate_reverse_geo_tags
 from Logger.logger_utils import get_logger
-from Models.Photo import Photo
-from Models.CrudBase import CRUDBase
-from util import Images
-from util.db_utils import init_db, AsyncSessionLocal
+from Models_.Photo import Photo
+from Models_.CrudBase import CRUDBase
+from utils import images_list
+from utils.db_utils import init_db, AsyncSessionLocal
 
 
 log = get_logger(__name__)
@@ -34,12 +34,12 @@ async def execute(db, image_path) -> List[str]:
 
 async def main():
   image_paths = [
-    Images.people_park_smoking,  # //ZDS_1759.NEF
-    Images.people_biking,  # //ZDS_2610.NEF
-    Images.nature_flower,  # //ZDS_1788.NEF
-    Images.nature_dog,  # //ZDS_2276.NEF
-    Images.nature_mushroom,  # //ZDS_1780.NEF
-    Images.nature_woods,  # //ZDS_2322.NEF
+    images_list.people_park_smoking,  # //ZDS_1759.NEF
+    images_list.people_biking,  # //ZDS_2610.NEF
+    images_list.nature_flower,  # //ZDS_1788.NEF
+    images_list.nature_dog,  # //ZDS_2276.NEF
+    images_list.nature_mushroom,  # //ZDS_1780.NEF
+    images_list.nature_woods,  # //ZDS_2322.NEF
   ]
   await init_db()
   async with AsyncSessionLocal() as db:

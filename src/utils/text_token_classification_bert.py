@@ -6,7 +6,7 @@ from transformers import (
 )
 from enum import Enum
 from src.Logger.logger_utils import get_logger
-from src.Models.Token import Token
+from src.Models_.Token import Token
 
 log = get_logger(__name__)
 log.debug("Start init AI")

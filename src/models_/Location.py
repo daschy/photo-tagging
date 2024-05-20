@@ -1,4 +1,4 @@
-from src.Models.Base import Base
+from src.Models_.Base import Base
 
 
 class Location(Base):

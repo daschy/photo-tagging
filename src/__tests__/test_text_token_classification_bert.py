@@ -1,6 +1,6 @@
 import pytest
 from typing import List
-from util.text_token_classification_bert import TextToTokenList, LABELS, Token
+from utils.text_token_classification_bert import TextToTokenList, LABELS, Token
 from __tests__.test_util.assert_lists_of_objects_equal_ignore_attr import (
   assert_lists_of_objects_equal_ignore_attr,
 )

@@ -2,7 +2,7 @@ import exifread
 from typing import List
 from geopy.geocoders import Nominatim
 
-from src.Models.Location import Location
+from src.Models_.Location import Location
 from Logger.logger_utils import get_logger
 
 log = get_logger(__name__)

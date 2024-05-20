@@ -9,10 +9,10 @@ from transformers import (
 
 from PIL import Image
 from Logger.logger_utils import get_logger
-from src.Models.Token import Token
-from src.Models.AI import AI
-from src.Models.Caption import Caption
-from util import text_token_classification_bert
+from src.Models_.Token import Token
+from src.Models_.AI import AI
+from src.Models_.Caption import Caption
+from utils import text_token_classification_bert
 
 
 log = get_logger(__name__)
