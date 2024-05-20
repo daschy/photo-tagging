@@ -103,7 +103,7 @@ async def _generate_keyword_list(image: Image) -> List[str]:
   return output
 
 
-async def generate_caption_tags(img_path: str) -> List[str]:
+async def generate_caption_keyword_list(img_path: str) -> List[str]:
   output_keyword_list: List[str] = []
   with Image.open(img_path) as image:
     output_keyword_list = await _generate_keyword_list(image)
@@ -115,7 +115,7 @@ async def generate_caption_tags(img_path: str) -> List[str]:
 
 async def main():
   img_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
-  captions = await generate_caption_tags(img_path)
+  captions = await generate_caption_keyword_list(img_path)
   log.info(f"{captions}")
 
 
