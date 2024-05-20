@@ -1,61 +1,65 @@
-from Logger.LoggerUtils import GetLogger
 import asyncio
 from typing import List
-from ImageToText import generateCaptionTags
-from ImageToReverseGeoTagging import generateReverseGeoTags
-from Utils import Images
-from Models.Photo import Photo
-from Utils.DbUtils import init_db, AsyncSessionLocal
-from Models.CrudBase import CRUDBase
+
+from models.Photo import Photo
+from models.CrudBase import CRUDBase
+from utils.image_to_keyword_list import generate_keyword_list
+from src.utils.image_to_reverse_geo_tagging import generate_reverse_geotag
+from src.utils.logger_utils import get_logger
+from src.utils.db_utils import init_db, AsyncSessionLocal
+from src.utils import images_list
+
+
+log = get_logger(__name__)
 
 
 async def execute(db, image_path) -> List[str]:
-    featureKeywordList: List[List[str]] = await asyncio.gather(
-        generateCaptionTags(image_path), generateReverseGeoTags(image_path)
+  photo_crud = CRUDBase(Photo)
+  retrieved_photo = await photo_crud.get_by(db, path=image_path)
+  image_keyword_list = []
+  if retrieved_photo is None:
+    feature_keyword_list: List[List[str]] = await asyncio.gather(
+      generate_keyword_list(image_path), generate_reverse_geotag(image_path)
     )
-    outputKeywordList: List[str] = list(
-        set(featureKeywordList[0] + featureKeywordList[1])
+    image_keyword_list: List[str] = sorted(
+      list(set(feature_keyword_list[0] + feature_keyword_list[1]))
     )
-    photo_crud = CRUDBase(Photo)
-    retrievedPhoto = await photo_crud.get_by(db, path=image_path)
-    if retrievedPhoto is None:
-        newPhoto = Photo(image_path)
-        newPhoto.addKeywordList(outputKeywordList)
-        await photo_crud.create(db, newPhoto)
-    else:
-        retrievedPhoto.setKeywordList(outputKeywordList)
-        await photo_crud.update(db, retrievedPhoto.id, retrievedPhoto)
-    return outputKeywordList
+    new_photo = Photo(image_path)
+    new_photo.add_keyword_list(image_keyword_list)
+    await photo_crud.create(db, new_photo)
+  else:
+    image_keyword_list = retrieved_photo.keyword_list
+  return image_keyword_list
 
 
 async def main():
-    imagePaths = [
-        Images.people_park_smoking,  # //ZDS_1759.NEF
-        Images.people_biking,  # //ZDS_2610.NEF
-        Images.nature_flower,  # //ZDS_1788.NEF
-        Images.nature_dog,  # //ZDS_2276.NEF
-        Images.nature_mushroom,  # //ZDS_1780.NEF
-        Images.nature_woods,  # //ZDS_2322.NEF
-    ]
-    await init_db()
-    async with AsyncSessionLocal() as db:
+  image_paths = [
+    images_list.people_park_smoking,  # //ZDS_1759.NEF
+    images_list.people_biking,  # //ZDS_2610.NEF
+    images_list.nature_flower,  # //ZDS_1788.NEF
+    images_list.nature_dog,  # //ZDS_2276.NEF
+    images_list.nature_mushroom,  # //ZDS_1780.NEF
+    images_list.nature_woods,  # //ZDS_2322.NEF
+  ]
+  await init_db()
+  async with AsyncSessionLocal() as db:
+    photo_crud = CRUDBase(Photo)
+    keyword_list = []
+    for idx, image_path in enumerate(image_paths):
+      retrieved_photo = await photo_crud.get_by(db, path=image_path)
+      if retrieved_photo is None:
         photo_crud = CRUDBase(Photo)
-        keywords = []
-        for idx, imagePath in enumerate(imagePaths):
-            retrievedPhoto = await photo_crud.get_by(db, path=imagePath)
-            if retrievedPhoto is None:
-                photo_crud = CRUDBase(Photo)
-                keywords = await asyncio.gather(
-                    *([execute(db, img) for img in imagePaths])
-                )
-            else:
-                keywords.append(retrievedPhoto.keywordList)
+        keyword_list = await asyncio.gather(
+          *([execute(db, img) for img in image_paths])
+        )
+      else:
+        keyword_list.append(retrieved_photo.keyword_list)
 
-        for idx, imagePath in enumerate(imagePaths):
-            tagList = keywords[idx]
-            log.info(f"{imagePath}: {tagList}")
+    for idx, image_path in enumerate(image_paths):
+      tag_list = keyword_list[idx]
+      log.info(f"{image_path}: {tag_list}")
 
 
 if __name__ == "__main__":
-    log = GetLogger(__name__)
-    asyncio.run(main())
+  log = get_logger(__name__)
+  asyncio.run(main())

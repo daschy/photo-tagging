@@ -1,6 +1,0 @@
-people_park_smoking = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
-people_biking = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_2610.NEF"
-nature_woods = "/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_2322.NEF"
-nature_dog = "/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_2276.NEF"
-nature_flower = "/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_1788.NEF"
-nature_mushroom = "/Users/1q82/Pictures/Photos/Amsterdam/Nature/ZDS_1780.NEF"
