@@ -10,7 +10,7 @@ log = get_logger(__name__)
 DATABASE_URL = os.environ.get("DATABASE_URL")
 log.info(f"DB URL = {DATABASE_URL}")
 
-engine = create_async_engine(DATABASE_URL, echo=True)
+engine = create_async_engine(DATABASE_URL, echo=False)
 
 
 AsyncSessionLocal = sessionmaker(

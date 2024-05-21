@@ -112,7 +112,6 @@ async def generate_keyword_list(img_path: str) -> List[str]:
   log.debug(img_path.split("/")[-1] + f": {output}")
   return output
 
-
 async def main():
   img_path = "/Users/1q82/Pictures/Photos/Amsterdam/People/ZDS_1759.NEF"
   captions = await generate_keyword_list(img_path)
