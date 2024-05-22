@@ -33,6 +33,7 @@ def get_logger(name: str):
       "wandb",
       "gliner",
       "sqlalchemy",
+      "sqlalchemy.engine.Engine"
     ],
   )
   log = logging.getLogger(name)

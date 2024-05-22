@@ -65,6 +65,6 @@ async def generate_reverse_geotag(image_path) -> List[str]:
     output = []
   else:
     address = _reverse_geotag(lat, long)
-    output = [address.country, address.city, address.road]
+    output = [x for x in [address.country, address.city, address.road] if x is not None]
   log.debug(f"{image_path}: {output}")
   return output
