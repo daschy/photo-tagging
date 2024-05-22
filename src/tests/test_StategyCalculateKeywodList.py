@@ -28,3 +28,13 @@ class TestStrategy:
       image_path=image_path
     )
     assert len(keyword_list) > 0
+    assert [
+      "Meester Jac. Takkade",
+      "Netherlands",
+      "background",
+      "black",
+      "blue",
+      "sky",
+      "white",
+      "windmill",
+    ] == keyword_list
