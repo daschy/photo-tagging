@@ -21,5 +21,9 @@ class AIGen(Base, Generic[ModelT, ProcessorT]):
     self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
   @abstractmethod
+  def is_init(self) -> bool:
+    pass
+
+  @abstractmethod
   def ai_init(self) -> Tuple[ModelT, ProcessorT]:
     pass

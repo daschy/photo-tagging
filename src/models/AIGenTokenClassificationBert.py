@@ -16,6 +16,11 @@ class AIGenTokenClassificationBert(AIGen):
     super().__init__(model_id=model_id)
     self.aggregation_strategy = aggregation_strategy
 
+  def is_init(
+    self,
+  ) -> bool:
+    return self.pipeline and self.model and self.processor
+
   def ai_init(
     self,
   ) -> Tuple[

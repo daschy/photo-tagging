@@ -11,6 +11,11 @@ class AIGenPaliGemma(AIGen):
   def __init__(self, model_id: str):
     super().__init__(model_id=model_id)
 
+  def is_init(
+    self,
+  ) -> bool:
+    return self.model and self.processor
+
   def ai_init(
     self,
   ) -> Tuple[
