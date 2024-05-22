@@ -1,6 +1,6 @@
 import os
 import pytest
-from utils.image_to_keyword_list import (
+from src.utils.image_to_keyword_list import (
   generate_keyword_list,
 )
 

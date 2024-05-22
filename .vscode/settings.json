@@ -4,5 +4,10 @@
     "python.linting.pylintArgs": [
         "--rcfile",
         "${workspaceFolder}/backend/.pylintrc"
-    ]
+    ],
+    "python.testing.pytestArgs": [
+        "."
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
