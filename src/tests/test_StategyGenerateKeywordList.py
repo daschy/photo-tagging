@@ -11,6 +11,7 @@ from src.models.AIGenPaliGemma import AIGenPaliGemma
 from src.models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
 
 
+
 class TestStrategyGenerateKeywordList:
   strategy: StrategyGenerateKeywordList = None
 
@@ -45,7 +46,7 @@ class TestStrategyGenerateKeywordList:
 
   @pytest.mark.asyncio
   async def test_save_keyword_list_image(self):
-    db_session, db_engine = await self.get_db_session()
+    db_session, db_engine = await self._get_db_engine_and_session()
     async with db_session() as db:
       image_path = f"{os.getcwd()}/src/tests/test_images/windmill_address_some_none.NEF"
       keyword_list = [
@@ -61,10 +62,10 @@ class TestStrategyGenerateKeywordList:
       save_output = await self.strategy.save(
         db, image_path=image_path, keyword_list=keyword_list
       )
-    await self.clear_db(engine=db_engine)
+    await self._clear_tables(engine=db_engine)
     assert save_output
 
-  async def get_db_session(
+  async def _get_db_engine_and_session(
     self,
   ) -> [
     AsyncSession,
@@ -80,6 +81,6 @@ class TestStrategyGenerateKeywordList:
     )
     return db_session, db_engine
 
-  async def clear_db(self, engine: AsyncEngine) -> None:
+  async def _clear_tables(self, engine: AsyncEngine) -> None:
     async with engine.begin() as conn:
       await conn.run_sync(BaseOrm.metadata.drop_all)
