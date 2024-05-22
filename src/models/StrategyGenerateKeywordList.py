@@ -1,5 +1,9 @@
 from typing import List
 import asyncio
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.models.CrudBase import CRUDBase
+from src.models.Photo import Photo
 from src.models.AIGenTokenClassificationBert import (
   TOKEN_TYPE,
   AIGenTokenClassificationBert,
@@ -9,7 +13,7 @@ from src.models.AIGenPaliGemma import AIGenPaliGemma
 from src.models.StrategyBase import StrategyBase
 
 
-class StrategyCalculateKeywordList(StrategyBase):
+class StrategyGenerateKeywordList(StrategyBase):
   def __init__(
     self,
     image_to_text_ai: AIGenPaliGemma,
@@ -31,7 +35,7 @@ class StrategyCalculateKeywordList(StrategyBase):
     if self.token_classification_ai.is_init() is False:
       raise ValueError("token_classification_ai is not initialized")
 
-  async def calculate_image_keyword_list(self, image_path: str) -> List[str]:
+  async def generate_keyword_list_image(self, image_path: str) -> List[str]:
     try:
       self._check_init()
       output_keyword_list = []
@@ -52,7 +56,9 @@ class StrategyCalculateKeywordList(StrategyBase):
         ),
         self.reverse_geotagging.generate_reverse_geotag(image_path=image_path),
       )
-      output_keyword_list = sorted(list(set(token_list[0] + token_list[1] + token_list[2])))
+      output_keyword_list = sorted(
+        list(set(token_list[0] + token_list[1] + token_list[2]))
+      )
       return output_keyword_list
 
     except FileNotFoundError as e:
@@ -60,4 +66,31 @@ class StrategyCalculateKeywordList(StrategyBase):
       raise
     except Exception as e:
       self.logger.exception(e)
+      raise
+
+  async def save(
+    self,
+    db: AsyncSession,
+    image_path: str,
+    keyword_list: List[str],
+    force_refresh_keyword_list: bool = False,
+  ) -> bool:
+    try:
+      photo_crud = CRUDBase(Photo)
+      retrieved_photo = await photo_crud.get_by(db, path=image_path)
+      if retrieved_photo is None:
+        new_photo = Photo(image_path)
+        new_photo.set_keyword_list(keyword_list)
+        await photo_crud.create(db, new_photo)
+      else:
+        if force_refresh_keyword_list is True:
+          retrieved_photo.set_keyword_list(keyword_list)
+        # keyword_list = retrieved_photo.keyword_list
+      return True
+
+    except FileNotFoundError as e:
+      self.logger.exception(e, f"Failed to add keywords to {image_path}: {e}")
+      raise
+    except Exception as e:
+      self.logger.exception(e, f"Failed to add keywords to {image_path}: {e}")
       raise

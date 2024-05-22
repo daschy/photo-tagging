@@ -9,4 +9,4 @@ class PhotoKeywordContext:
     self._strategy = strategy
 
   async def add_keywords(self, image_path):
-    await self._strategy.calculate_image_keyword_list(image_path)
+    await self._strategy.generate_keyword_list_image(image_path)

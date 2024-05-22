@@ -8,5 +8,5 @@ class StrategySaveKeywordToFile(StrategyBase):
   def __init__(self, logger: Logger):
     self.logger = logger
 
-  async def calculate_image_keyword_list(self, image_path: str) -> List[str]:
+  async def generate_keyword_list_image(self, image_path: str) -> List[str]:
     return []

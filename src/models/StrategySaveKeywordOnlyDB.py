@@ -14,7 +14,7 @@ class StrategySaveKeywordOnlyDB(StrategyBase):
     self.db = db
     self.logger = logger
 
-  async def calculate_image_keyword_list(self, image_path: str) -> None:
+  async def generate_keyword_list_image(self, image_path: str) -> None:
     try:
       photo_crud = CRUDBase(Photo)
       retrieved_photo = await photo_crud.get_by(self.db, path=image_path)
