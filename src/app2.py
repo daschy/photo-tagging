@@ -17,15 +17,14 @@ async def process_image(context: PhotoKeywordContext, image_path: str):
 
 
 async def main(root_dir: str):
-  # await init_db()
+  await init_db()
   async with AsyncSessionLocal() as db:
     # Initialize the context with a concrete strategy
     context = PhotoKeywordContext(StrategySaveKeywordOnlyDB(log, db))
     # executor = ThreadPoolExecutor()
-    tasks_list = []
     extensions = [".png", ".jpg", ".jpeg", ".tiff", ".nef"]
     # with ThreadPoolExecutor() as executor:
-    for subdir, dir, files in os.walk(root_dir):
+    for subdir, _, files in os.walk(root_dir):
       for file in files:
         ext = os.path.splitext(file)[-1].lower()
         if ext in extensions:
