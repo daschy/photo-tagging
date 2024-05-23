@@ -7,7 +7,7 @@ from src.models.orm.BaseOrm import BaseOrm
 from src.models.Base import Base
 
 
-class Photo(Base, BaseOrm):
+class Photo(BaseOrm):
   __tablename__ = "Photos"
   id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
   path = Column(String, nullable=True, unique=True)
@@ -15,11 +15,11 @@ class Photo(Base, BaseOrm):
   keyword_list = Column(JSON, nullable=True)
   created_at = Column(
     DateTime,
-    default=lambda: datetime.now(pytz.UTC),
+    # default=lambda: datetime.now(pytz.UTC),
   )
   updated_at = Column(
     DateTime,
-    default=lambda: datetime.now(pytz.UTC),
+    # default=lambda: datetime.now(pytz.UTC),
     onupdate=lambda: datetime.now(pytz.UTC),
   )
 

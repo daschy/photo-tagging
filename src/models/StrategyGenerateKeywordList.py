@@ -1,5 +1,5 @@
 import os
-from pathlib import Path
+from glob import glob
 from typing import List
 import asyncio
 from src.models.orm.CrudBase import CRUDBase
@@ -72,26 +72,15 @@ class StrategyGenerateKeywordList(StrategyBase):
       self.logger.exception(e)
       raise
 
-  async def save(
-    self,
-    image_path: str,
-    keyword_list: List[str],
-    force_refresh_keyword_list: bool = False,
-  ) -> bool:
+  async def save(self, image_path: str, keyword_list: List[str]) -> bool:
     try:
       session = get_db_session(self.db_engine)
       async with session() as db:
         photo_crud = CRUDBase(Photo)
-        retrieved_photo = await photo_crud.get_by(db, path=image_path)
-        if retrieved_photo is None:
-          new_photo = Photo(image_path)
-          new_photo.set_keyword_list(keyword_list)
-          await photo_crud.create(db, new_photo)
-        else:
-          if force_refresh_keyword_list is True:
-            retrieved_photo.set_keyword_list(keyword_list)
-          # keyword_list = retrieved_photo.keyword_list
-        return True
+        new_photo = Photo(image_path)
+        new_photo.set_keyword_list(keyword_list)
+        await photo_crud.create(db, new_photo)
+      return True
 
     except FileNotFoundError as e:
       self.logger.exception(e, f"Failed to add keywords to {image_path}: {e}")
@@ -101,12 +90,33 @@ class StrategyGenerateKeywordList(StrategyBase):
       raise
 
   async def generate_keyword_list_directory(self, root_dir: str) -> bool:
-    extensions = [".png", ".jpg", ".jpeg", ".tiff", ".nef"]
-    for subdir, _, file_name_list in os.walk(root_dir):
-      for file_name in file_name_list:
-        ext = os.path.splitext(file_name)[-1].lower()
-        if ext in extensions:
-          image_path = os.path.join(subdir, file_name)
+    extensions = [".png", ".jpg", ".jpeg", ".tiff", ".nef", ".tiff"]
+    # for subdir, _, file_name_list in os.walk(root_dir):
+    # for idx, file_name in enumerate(file_name_list):
+    file_name_list = []
+    for ext in extensions:
+      pattern = os.path.join(root_dir, "**", f"*{ext.lower()}")
+      file_name_list += glob(
+        pattern,
+        recursive=True,
+      )
+      pattern = os.path.join(root_dir, "**", f"*{ext.upper()}")
+      file_name_list += glob(
+        pattern,
+        recursive=True,
+      )
+
+    for idx, file_name in enumerate(file_name_list):
+      ext = os.path.splitext(file_name)[-1].lower()
+      if ext in extensions:
+        image_path = file_name  # os.path.join(subdir, file_name)
+        session = get_db_session(self.db_engine)
+        async with session() as db:
+          photo_crud = CRUDBase(Photo)
+          retrieved_photo = await photo_crud.get_by(db, path=image_path)
+        if retrieved_photo is None:
           keyword_list = await self.generate_keyword_list_image(image_path=image_path)
+          self.logger.debug(f"{os.path.split(image_path)[1]}: {keyword_list}")
           await self.save(image_path=image_path, keyword_list=keyword_list)
+      self.logger.debug(f"{idx+1}/{len(file_name_list)} end")
     return True

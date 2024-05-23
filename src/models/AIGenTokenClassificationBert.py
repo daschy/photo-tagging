@@ -53,5 +53,5 @@ class AIGenTokenClassificationBert(AIGen):
       output = [
         token["word"] for token in tokens if token["entity_group"] == (token_type.value)
       ]
-    self.logger.debug("end tokenization {token_type.value}")
+    self.logger.debug(f"end tokenization {token_type.value}")
     return output

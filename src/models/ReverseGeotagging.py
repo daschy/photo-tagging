@@ -61,7 +61,7 @@ class ReverseGeotagging(Base):
 
   async def generate_reverse_geotag(self, image_path) -> List[str]:
     lat, long = self._get_gps_coordinates(image_path=image_path)
-    self.logger.debug(f"start {image_path}: lat={lat},long={long}")
+    # self.logger.debug(f"start {image_path}: lat={lat},long={long}")
     if lat is None or long is None:
       output = []
     else:
@@ -69,5 +69,5 @@ class ReverseGeotagging(Base):
       output = [
         x for x in [address.country, address.city, address.road] if x is not None
       ]
-    self.logger.debug(f"end {image_path}: {output}")
+    # self.logger.debug(f"end {image_path}: {output}")
     return output
