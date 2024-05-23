@@ -101,6 +101,8 @@ class StrategyGenerateKeywordList(StrategyBase):
     self,
     root_dir: str,
     extension_list: List[str] = [],
+    save_on_file: bool = False,
+    save_on_db: bool = True,
   ) -> bool:
     extension_list_ = (
       extension_list
@@ -130,6 +132,9 @@ class StrategyGenerateKeywordList(StrategyBase):
       if retrieved_photo is None:
         keyword_list = await self.generate_keyword_list_image(image_path=image_path)
         self.logger.info(f"{os.path.split(image_path)[1]}: {keyword_list}")
-        await self.save_to_db(image_path=image_path, keyword_list=keyword_list)
+        if save_on_db:
+          await self.save_to_db(image_path=image_path, keyword_list=keyword_list)
+        if save_on_file:
+          await self.save_to_file(image_path=image_path, keyword_list=keyword_list)
       self.logger.info(f"{idx+1}/{len(file_name_list)} end")
     return True

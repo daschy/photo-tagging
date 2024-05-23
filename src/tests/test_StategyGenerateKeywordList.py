@@ -15,19 +15,22 @@ class TestStrategyGenerateKeywordList:
 
   @classmethod
   def setup_class(cls):
+    db_path = os.path.join(os.getcwd(), "src", "tests", "test_data", "test.db")
     cls.strategy = StrategyGenerateKeywordList(
       image_to_text_ai=AIGenPaliGemma(model_id="google/paligemma-3b-ft-cococap-448"),
       token_classification_ai=AIGenTokenClassificationBert(
         model_id="vblagoje/bert-english-uncased-finetuned-pos",
       ),
       reverse_geotagging=ReverseGeotagging(),
-      db_path=f"sqlite+aiosqlite:////{os.getcwd()}/src/tests/test_data/test.db",
+      db_path=f"sqlite+aiosqlite:////{db_path}",
     )
 
   @pytest.mark.asyncio
   async def test_generate_keyword_list_image(self):
     await self.strategy.init()
-    image_path = f"{os.getcwd()}/src/tests/test_data/windmill_address_some_none.NEF"
+    image_path = os.path.join(
+      os.getcwd(), "src", "tests", "test_data", "windmill_address_some_none.NEF"
+    )
     keyword_list = await self.strategy.generate_keyword_list_image(
       image_path=image_path
     )
@@ -46,7 +49,9 @@ class TestStrategyGenerateKeywordList:
   @pytest.mark.asyncio
   async def test_save_to_db(self):
     await self.strategy.init()
-    image_path = f"{os.getcwd()}/src/tests/test_data/windmill_address_some_none.NEF"
+    image_path = os.path.join(
+      os.getcwd(), "src", "tests", "test_data", "windmill_address_some_none.NEF"
+    )
     keyword_list = [
       "background",
       "black",
@@ -66,7 +71,9 @@ class TestStrategyGenerateKeywordList:
   @pytest.mark.asyncio
   async def test_save_to_file(self):
     await self.strategy.init()
-    image_path = f"{os.getcwd()}/src/tests/test_data/windmill_address_some_none.NEF"
+    image_path = os.path.join(
+      os.getcwd(), "src", "tests", "test_data", "windmill_address_some_none.NEF"
+    )
     keyword_list = [
       "background",
       "black",
@@ -88,9 +95,9 @@ class TestStrategyGenerateKeywordList:
     assert keyword_list == keyword_list_read_from_file
 
   @pytest.mark.asyncio
-  async def test_generate_keyword_list_directory(self):
+  async def test_generate_keyword_list_directory_save_on_db(self):
     await self.strategy.init()
-    directory_path = f"{os.getcwd()}/src/tests/test_data"
+    directory_path = os.path.join(os.getcwd(), "src", "tests", "test_data")
     extension_list = ["nef"]
     save_output = await self.strategy.generate_keyword_list_directory(
       root_dir=directory_path, extension_list=extension_list
@@ -104,5 +111,22 @@ class TestStrategyGenerateKeywordList:
       photo_crud = CRUDBase(Photo)
       saved_entries = await photo_crud.get_all(db)
       assert len(saved_entries) == len(image_path_list)
+
+    await clear_tables(engine=self.strategy.db_engine)
+
+  @pytest.mark.asyncio
+  async def test_generate_keyword_list_directory_do_not_on_db(self):
+    await self.strategy.init()
+    directory_path = os.path.join(os.getcwd(), "src", "tests", "test_data")
+    extension_list = ["nef"]
+    save_output = await self.strategy.generate_keyword_list_directory(
+      root_dir=directory_path, extension_list=extension_list, save_on_db=False
+    )
+    assert save_output
+    session = get_db_session(self.strategy.db_engine)
+    async with session() as db:
+      photo_crud = CRUDBase(Photo)
+      saved_entries = await photo_crud.get_all(db)
+      assert len(saved_entries) == 0
 
     await clear_tables(engine=self.strategy.db_engine)
