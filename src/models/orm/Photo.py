@@ -15,11 +15,11 @@ class Photo(BaseOrm):
   keyword_list = Column(JSON, nullable=True)
   created_at = Column(
     DateTime,
-    # default=lambda: datetime.now(pytz.UTC),
+    default=lambda: datetime.now(pytz.UTC),
   )
   updated_at = Column(
     DateTime,
-    # default=lambda: datetime.now(pytz.UTC),
+    default=lambda: datetime.now(pytz.UTC),
     onupdate=lambda: datetime.now(pytz.UTC),
   )
 
