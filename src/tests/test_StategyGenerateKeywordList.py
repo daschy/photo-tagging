@@ -93,5 +93,6 @@ class TestStrategyGenerateKeywordList:
     save_output = await self.strategy.generate_keyword_list_directory(
       root_dir=directory_path
     )
+    
     await clear_tables(engine=self.strategy.db_engine)
     assert save_output

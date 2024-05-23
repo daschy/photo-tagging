@@ -6,19 +6,10 @@ import json
 
 
 EXIF_TAG_KEYWORDS: str = "Keywords"
+EXIF_TAG_IMAGEDESCRIPTION: str = "ImageDescription"
 
 
 class ImageCRUD(Base):
-  def __init__(self):
-    super().__init__()
-    self.divider: str = ","
-
-  def _encode_keyword_list(self, keyword_list: List[str]) -> str:
-    return self.divider.join(keyword_list)
-
-  def _decode_keyword_list_string(self, keyword_list_string: str) -> List[str]:
-    return keyword_list_string.split(self.divider)
-
   async def save_keyword_list(
     self, file_path, keyword_list: List[str], do_not_overwrite: bool = False
   ) -> bool:

@@ -52,7 +52,7 @@ class StrategyGenerateKeywordList(StrategyBase):
           prompt="what are the four most dominant colors in the picture?",
         ),
       )
-      text = caption_color_list[0] + caption_color_list[1]
+      text = caption_color_list[0] + " " + caption_color_list[1]
       token_list: List[List[str]] = await asyncio.gather(
         self.token_classification_ai.generate_token_list(
           text=text, token_type=TOKEN_TYPE.NOUN
