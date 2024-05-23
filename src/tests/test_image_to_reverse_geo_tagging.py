@@ -9,7 +9,7 @@ from src.utils.image_to_reverse_geo_tagging import (
 async def test_generate_reverse_geo_tags_image_with_no_gps():
   # Call the generateReverseGeoTags function
   result = await generate_reverse_geotag(
-    f"{os.getcwd()}/src/tests/test_images/person_biking_no_gps.NEF"
+    f"{os.getcwd()}/src/tests/test_data/person_biking_no_gps.NEF"
   )
 
   # Verify the result
@@ -22,7 +22,7 @@ async def test_generate_reverse_geo_tags_image_with_no_gps():
 async def test_generate_reverse_geo_tags_image_with_gps_values():
   # Call the generateReverseGeoTags function
   result = await generate_reverse_geotag(
-    f"{os.getcwd()}/src/tests/test_images/person_walking_gps.NEF"
+    f"{os.getcwd()}/src/tests/test_data/person_walking_gps.NEF"
   )
 
   # Verify the result
@@ -33,7 +33,7 @@ async def test_generate_reverse_geo_tags_image_with_gps_values():
 async def test_generate_reverse_geo_tags_image_with_some_address_none():
   # Call the generateReverseGeoTags function
   result = await generate_reverse_geotag(
-    f"{os.getcwd()}/src/tests/test_images/windmill_address_some_none.NEF"
+    f"{os.getcwd()}/src/tests/test_data/windmill_address_some_none.NEF"
   )
 
   # Verify the result

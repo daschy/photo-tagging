@@ -37,7 +37,7 @@ def get_logger(name: str):
     ],
   )
   log = logging.getLogger(name)
-  level = logging.DEBUG
+  level = logging.INFO
   coloredlogs.install(logger=log, level=level)
   log.setLevel(level)
   return log
