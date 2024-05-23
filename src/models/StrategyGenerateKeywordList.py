@@ -116,7 +116,7 @@ class StrategyGenerateKeywordList(StrategyBase):
           retrieved_photo = await photo_crud.get_by(db, path=image_path)
         if retrieved_photo is None:
           keyword_list = await self.generate_keyword_list_image(image_path=image_path)
-          self.logger.debug(f"{os.path.split(image_path)[1]}: {keyword_list}")
+          self.logger.info(f"{os.path.split(image_path)[1]}: {keyword_list}")
           await self.save(image_path=image_path, keyword_list=keyword_list)
-      self.logger.debug(f"{idx+1}/{len(file_name_list)} end")
+      self.logger.info(f"{idx+1}/{len(file_name_list)} end")
     return True

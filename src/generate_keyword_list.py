@@ -1,3 +1,4 @@
+from logging import INFO
 import os
 import asyncio
 from src.models.AIGenPaliGemma import AIGenPaliGemma
@@ -18,6 +19,7 @@ async def main(root_dir: str):
     db_path=f"sqlite+aiosqlite:////{os.getcwd()}/prod_paligemma-3b-ft-cococap.db",
   )
   await strategy.init()
+  strategy.logger.setLevel(INFO)
   await strategy.generate_keyword_list_directory(root_dir=root_dir)
 
 
