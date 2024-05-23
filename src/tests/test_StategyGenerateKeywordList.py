@@ -1,11 +1,13 @@
 import os
 import pytest
-from src.models.ImageCRUD import ImageCRUD
-from src.tests.test_utils.test_db_utils import clear_tables
+from src.models.orm.Photo import Photo
+from src.models.orm.CrudBase import CRUDBase
+from src.tests.test_utils.test_utils import clear_tables, get_all_file_dir
 from src.models.ReverseGeotagging import ReverseGeotagging
 from src.models.AIGenTokenClassificationBert import AIGenTokenClassificationBert
 from src.models.AIGenPaliGemma import AIGenPaliGemma
 from src.models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
+from src.utils.db_utils_async import get_db_session
 
 
 class TestStrategyGenerateKeywordList:
@@ -89,10 +91,18 @@ class TestStrategyGenerateKeywordList:
   async def test_generate_keyword_list_directory(self):
     await self.strategy.init()
     directory_path = f"{os.getcwd()}/src/tests/test_data"
-
+    extension_list = ["nef"]
     save_output = await self.strategy.generate_keyword_list_directory(
-      root_dir=directory_path
+      root_dir=directory_path, extension_list=extension_list
     )
-    
-    await clear_tables(engine=self.strategy.db_engine)
     assert save_output
+    image_path_list = get_all_file_dir(
+      directory_path=directory_path, extension=extension_list[0]
+    )
+    session = get_db_session(self.strategy.db_engine)
+    async with session() as db:
+      photo_crud = CRUDBase(Photo)
+      saved_entries = await photo_crud.get_all(db)
+      assert len(saved_entries) == len(image_path_list)
+
+    await clear_tables(engine=self.strategy.db_engine)

@@ -97,18 +97,24 @@ class StrategyGenerateKeywordList(StrategyBase):
       self.logger.exception(e, f"Failed to add keywords to {image_path}: {e}")
       raise
 
-  async def generate_keyword_list_directory(self, root_dir: str) -> bool:
-    extensions = [".png", ".jpg", ".jpeg", ".tiff", ".nef", ".tiff"]
-    # for subdir, _, file_name_list in os.walk(root_dir):
-    # for idx, file_name in enumerate(file_name_list):
+  async def generate_keyword_list_directory(
+    self,
+    root_dir: str,
+    extension_list: List[str] = [],
+  ) -> bool:
+    extension_list_ = (
+      extension_list
+      if len(extension_list) > 0
+      else ["png", "jpg", "jpeg", "tiff", "nef", "tiff"]
+    )
     file_name_list = []
-    for ext in extensions:
-      pattern = os.path.join(root_dir, "**", f"*{ext.lower()}")
+    for ext in extension_list_:
+      pattern = os.path.join(root_dir, "**", f"*.{ext.lower()}")
       file_name_list += glob(
         pattern,
         recursive=True,
       )
-      pattern = os.path.join(root_dir, "**", f"*{ext.upper()}")
+      pattern = os.path.join(root_dir, "**", f"*.{ext.upper()}")
       file_name_list += glob(
         pattern,
         recursive=True,
@@ -116,15 +122,14 @@ class StrategyGenerateKeywordList(StrategyBase):
 
     for idx, file_name in enumerate(file_name_list):
       ext = os.path.splitext(file_name)[-1].lower()
-      if ext in extensions:
-        image_path = file_name  # os.path.join(subdir, file_name)
-        session = get_db_session(self.db_engine)
-        async with session() as db:
-          photo_crud = CRUDBase(Photo)
-          retrieved_photo = await photo_crud.get_by(db, path=image_path)
-        if retrieved_photo is None:
-          keyword_list = await self.generate_keyword_list_image(image_path=image_path)
-          self.logger.info(f"{os.path.split(image_path)[1]}: {keyword_list}")
-          await self.save_to_db(image_path=image_path, keyword_list=keyword_list)
+      image_path = file_name  # os.path.join(subdir, file_name)
+      session = get_db_session(self.db_engine)
+      async with session() as db:
+        photo_crud = CRUDBase(Photo)
+        retrieved_photo = await photo_crud.get_by(db, path=image_path)
+      if retrieved_photo is None:
+        keyword_list = await self.generate_keyword_list_image(image_path=image_path)
+        self.logger.info(f"{os.path.split(image_path)[1]}: {keyword_list}")
+        await self.save_to_db(image_path=image_path, keyword_list=keyword_list)
       self.logger.info(f"{idx+1}/{len(file_name_list)} end")
     return True
