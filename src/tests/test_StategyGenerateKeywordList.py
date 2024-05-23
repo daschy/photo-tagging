@@ -1,5 +1,6 @@
 import os
 import pytest
+from src.models.ImageCRUD import ImageCRUD
 from src.tests.test_utils.test_db_utils import clear_tables
 from src.models.ReverseGeotagging import ReverseGeotagging
 from src.models.AIGenTokenClassificationBert import AIGenTokenClassificationBert
@@ -41,7 +42,7 @@ class TestStrategyGenerateKeywordList:
     ] == keyword_list
 
   @pytest.mark.asyncio
-  async def test_save_keyword_list_image(self):
+  async def test_save_to_db(self):
     await self.strategy.init()
     image_path = f"{os.getcwd()}/src/tests/test_data/windmill_address_some_none.NEF"
     keyword_list = [
@@ -54,11 +55,35 @@ class TestStrategyGenerateKeywordList:
       "white",
       "windmill",
     ]
-    save_output = await self.strategy.save(
+    save_output = await self.strategy.save_to_db(
       image_path=image_path, keyword_list=keyword_list
     )
     await clear_tables(engine=self.strategy.db_engine)
     assert save_output
+
+  @pytest.mark.asyncio
+  async def test_save_to_file(self):
+    await self.strategy.init()
+    image_path = f"{os.getcwd()}/src/tests/test_data/windmill_address_some_none.NEF"
+    keyword_list = [
+      "background",
+      "black",
+      "blue",
+      "Meester Jac. Takkade",
+      "Netherlands",
+      "sky",
+      "white",
+      "windmill",
+    ]
+    save_output = await self.strategy.save_to_file(
+      image_path=image_path, keyword_list=keyword_list
+    )
+    assert save_output
+    keyword_list_read_from_file = await self.strategy.image_crud.read_keyword_list(
+      image_path
+    )
+    assert len(keyword_list) == len(keyword_list_read_from_file)
+    assert keyword_list == keyword_list_read_from_file
 
   @pytest.mark.asyncio
   async def test_generate_keyword_list_directory(self):

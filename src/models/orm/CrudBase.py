@@ -2,13 +2,15 @@
 from typing import Type, TypeVar, Generic, List
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.models.Base import Base
 from src.models.orm.BaseOrm import BaseOrm
 
 T = TypeVar("T", bound=BaseOrm)
 
 
-class CRUDBase(Generic[T]):
+class CRUDBase(Base, Generic[T]):
   def __init__(self, model: Type[T]):
+    super().__init__()
     self.model = model
 
   async def get(self, db: AsyncSession, id: int) -> T:

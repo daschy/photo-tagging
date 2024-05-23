@@ -11,6 +11,7 @@ from src.models.AIGenTokenClassificationBert import (
 from src.models.ReverseGeotagging import ReverseGeotagging
 from src.models.AIGenPaliGemma import AIGenPaliGemma
 from src.models.StrategyBase import StrategyBase
+from src.models.ImageCRUD import ImageCRUD
 from src.utils.db_utils_async import get_db_session, init_engine
 
 
@@ -27,6 +28,7 @@ class StrategyGenerateKeywordList(StrategyBase):
     self.token_classification_ai: AIGenTokenClassificationBert = token_classification_ai
     self.reverse_geotagging: ReverseGeotagging = reverse_geotagging
     self.db_path = db_path
+    self.image_crud = ImageCRUD()
 
   async def init(self):
     self.image_to_text_ai.ai_init()
@@ -72,7 +74,13 @@ class StrategyGenerateKeywordList(StrategyBase):
       self.logger.exception(e)
       raise
 
-  async def save(self, image_path: str, keyword_list: List[str]) -> bool:
+  async def save_to_file(self, image_path: str, keyword_list: List[str]) -> bool:
+    output = await self.image_crud.save_keyword_list(
+      image_path, keyword_list=keyword_list
+    )
+    return output
+
+  async def save_to_db(self, image_path: str, keyword_list: List[str]) -> bool:
     try:
       session = get_db_session(self.db_engine)
       async with session() as db:
@@ -117,6 +125,6 @@ class StrategyGenerateKeywordList(StrategyBase):
         if retrieved_photo is None:
           keyword_list = await self.generate_keyword_list_image(image_path=image_path)
           self.logger.info(f"{os.path.split(image_path)[1]}: {keyword_list}")
-          await self.save(image_path=image_path, keyword_list=keyword_list)
+          await self.save_to_db(image_path=image_path, keyword_list=keyword_list)
       self.logger.info(f"{idx+1}/{len(file_name_list)} end")
     return True
