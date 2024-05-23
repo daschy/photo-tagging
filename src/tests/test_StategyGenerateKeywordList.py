@@ -1,15 +1,10 @@
 import os
 import pytest
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, AsyncEngine
-
-# from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from src.models.BaseOrm import BaseOrm
+from src.tests.test_utils.test_db_utils import get_db_engine_and_session, clear_tables
 from src.models.ReverseGeotagging import ReverseGeotagging
 from src.models.AIGenTokenClassificationBert import AIGenTokenClassificationBert
 from src.models.AIGenPaliGemma import AIGenPaliGemma
 from src.models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
-
 
 
 class TestStrategyGenerateKeywordList:
@@ -23,11 +18,12 @@ class TestStrategyGenerateKeywordList:
         model_id="vblagoje/bert-english-uncased-finetuned-pos",
       ),
       reverse_geotagging=ReverseGeotagging(),
+      db_path=f"sqlite+aiosqlite:////{os.getcwd()}/src/tests/test_images/test.db",
     )
-    cls.strategy.init()
 
   @pytest.mark.asyncio
   async def test_generate_keyword_list_image(self):
+    await self.strategy.init()
     image_path = f"{os.getcwd()}/src/tests/test_images/windmill_address_some_none.NEF"
     keyword_list = await self.strategy.generate_keyword_list_image(
       image_path=image_path
@@ -46,41 +42,20 @@ class TestStrategyGenerateKeywordList:
 
   @pytest.mark.asyncio
   async def test_save_keyword_list_image(self):
-    db_session, db_engine = await self._get_db_engine_and_session()
-    async with db_session() as db:
-      image_path = f"{os.getcwd()}/src/tests/test_images/windmill_address_some_none.NEF"
-      keyword_list = [
-        "Meester Jac. Takkade",
-        "Netherlands",
-        "background",
-        "black",
-        "blue",
-        "sky",
-        "white",
-        "windmill",
-      ]
-      save_output = await self.strategy.save(
-        db, image_path=image_path, keyword_list=keyword_list
-      )
-    await self._clear_tables(engine=db_engine)
-    assert save_output
-
-  async def _get_db_engine_and_session(
-    self,
-  ) -> [
-    AsyncSession,
-    AsyncEngine,
-  ]:  # type: ignore
-    db_path = f"sqlite+aiosqlite:////{os.getcwd()}/src/tests/test_images/test.db"
-    db_engine: AsyncEngine = create_async_engine(db_path, echo=True)
-    # Create the tables
-    async with db_engine.begin() as conn:
-      await conn.run_sync(BaseOrm.metadata.create_all)
-    db_session = sessionmaker(
-      bind=db_engine, class_=AsyncSession, expire_on_commit=False
+    await self.strategy.init()
+    image_path = f"{os.getcwd()}/src/tests/test_images/windmill_address_some_none.NEF"
+    keyword_list = [
+      "Meester Jac. Takkade",
+      "Netherlands",
+      "background",
+      "black",
+      "blue",
+      "sky",
+      "white",
+      "windmill",
+    ]
+    save_output = await self.strategy.save_to_db(
+      image_path=image_path, keyword_list=keyword_list
     )
-    return db_session, db_engine
-
-  async def _clear_tables(self, engine: AsyncEngine) -> None:
-    async with engine.begin() as conn:
-      await conn.run_sync(BaseOrm.metadata.drop_all)
+    await clear_tables(engine=self.strategy.db_engine)
+    assert save_output

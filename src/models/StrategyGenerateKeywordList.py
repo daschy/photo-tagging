@@ -1,7 +1,5 @@
 from typing import List
 import asyncio
-
-from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.CrudBase import CRUDBase
 from src.models.Photo import Photo
 from src.models.AIGenTokenClassificationBert import (
@@ -11,6 +9,7 @@ from src.models.AIGenTokenClassificationBert import (
 from src.models.ReverseGeotagging import ReverseGeotagging
 from src.models.AIGenPaliGemma import AIGenPaliGemma
 from src.models.StrategyBase import StrategyBase
+from src.utils.db_utils_async import get_db_session, init_engine
 
 
 class StrategyGenerateKeywordList(StrategyBase):
@@ -19,15 +18,18 @@ class StrategyGenerateKeywordList(StrategyBase):
     image_to_text_ai: AIGenPaliGemma,
     token_classification_ai: AIGenTokenClassificationBert,
     reverse_geotagging: ReverseGeotagging,
+    db_path: str,
   ):
     super().__init__()
     self.image_to_text_ai: AIGenPaliGemma = image_to_text_ai
     self.token_classification_ai: AIGenTokenClassificationBert = token_classification_ai
     self.reverse_geotagging: ReverseGeotagging = reverse_geotagging
+    self.db_path = db_path
 
-  def init(self):
+  async def init(self):
     self.image_to_text_ai.ai_init()
     self.token_classification_ai.ai_init()
+    self.db_engine = await init_engine(self.db_path)
 
   def _check_init(self):
     if self.image_to_text_ai.is_init() is False:
@@ -68,25 +70,26 @@ class StrategyGenerateKeywordList(StrategyBase):
       self.logger.exception(e)
       raise
 
-  async def save(
+  async def save_to_db(
     self,
-    db: AsyncSession,
     image_path: str,
     keyword_list: List[str],
     force_refresh_keyword_list: bool = False,
   ) -> bool:
     try:
-      photo_crud = CRUDBase(Photo)
-      retrieved_photo = await photo_crud.get_by(db, path=image_path)
-      if retrieved_photo is None:
-        new_photo = Photo(image_path)
-        new_photo.set_keyword_list(keyword_list)
-        await photo_crud.create(db, new_photo)
-      else:
-        if force_refresh_keyword_list is True:
-          retrieved_photo.set_keyword_list(keyword_list)
-        # keyword_list = retrieved_photo.keyword_list
-      return True
+      session = get_db_session(self.db_engine)
+      async with session() as db:
+        photo_crud = CRUDBase(Photo)
+        retrieved_photo = await photo_crud.get_by(db, path=image_path)
+        if retrieved_photo is None:
+          new_photo = Photo(image_path)
+          new_photo.set_keyword_list(keyword_list)
+          await photo_crud.create(db, new_photo)
+        else:
+          if force_refresh_keyword_list is True:
+            retrieved_photo.set_keyword_list(keyword_list)
+          # keyword_list = retrieved_photo.keyword_list
+        return True
 
     except FileNotFoundError as e:
       self.logger.exception(e, f"Failed to add keywords to {image_path}: {e}")
@@ -94,3 +97,8 @@ class StrategyGenerateKeywordList(StrategyBase):
     except Exception as e:
       self.logger.exception(e, f"Failed to add keywords to {image_path}: {e}")
       raise
+
+  async def generate_keyword_list_directory(
+    self, directory_path: str, db_path: str
+  ) -> bool:
+    return False
