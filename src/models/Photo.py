@@ -13,12 +13,18 @@ class Photo(Base, BaseOrm):
   path = Column(String, nullable=True, unique=True)
   filename = Column(String, nullable=True)
   keyword_list = Column(JSON, nullable=True)
-  created_at = Column(DateTime, default=datetime.now(pytz.UTC))
+  created_at = Column(
+    DateTime,
+    default=lambda: datetime.now(pytz.UTC),
+  )
   updated_at = Column(
-    DateTime, default=datetime.now(pytz.UTC), onupdate=datetime.now(pytz.UTC)
+    DateTime,
+    default=lambda: datetime.now(pytz.UTC),
+    onupdate=lambda: datetime.now(pytz.UTC),
   )
 
   def __init__(self, path: str):
+    super().__init__()
     self.path = path
     self.keyword_list = []
     self.filename = path.split("/")[-1]
