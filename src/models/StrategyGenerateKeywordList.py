@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 from typing import List
 import asyncio
 from src.models.CrudBase import CRUDBase
@@ -59,7 +61,7 @@ class StrategyGenerateKeywordList(StrategyBase):
         self.reverse_geotagging.generate_reverse_geotag(image_path=image_path),
       )
       output_keyword_list = sorted(
-        list(set(token_list[0] + token_list[1] + token_list[2]))
+        list(set(token_list[0] + token_list[1] + token_list[2])), key=str.casefold
       )
       return output_keyword_list
 
@@ -70,7 +72,7 @@ class StrategyGenerateKeywordList(StrategyBase):
       self.logger.exception(e)
       raise
 
-  async def save_to_db(
+  async def save(
     self,
     image_path: str,
     keyword_list: List[str],
@@ -98,7 +100,13 @@ class StrategyGenerateKeywordList(StrategyBase):
       self.logger.exception(e, f"Failed to add keywords to {image_path}: {e}")
       raise
 
-  async def generate_keyword_list_directory(
-    self, directory_path: str, db_path: str
-  ) -> bool:
-    return False
+  async def generate_keyword_list_directory(self, root_dir: str) -> bool:
+    extensions = [".png", ".jpg", ".jpeg", ".tiff", ".nef"]
+    for subdir, _, file_name_list in os.walk(root_dir):
+      for file_name in file_name_list:
+        ext = os.path.splitext(file_name)[-1].lower()
+        if ext in extensions:
+          image_path = os.path.join(subdir, file_name)
+          keyword_list = await self.generate_keyword_list_image(image_path=image_path)
+          await self.save(image_path=image_path, keyword_list=keyword_list)
+    return True

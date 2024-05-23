@@ -30,11 +30,11 @@ class TestStrategyGenerateKeywordList:
     )
     assert len(keyword_list) > 0
     assert [
-      "Meester Jac. Takkade",
-      "Netherlands",
       "background",
       "black",
       "blue",
+      "Meester Jac. Takkade",
+      "Netherlands",
       "sky",
       "white",
       "windmill",
@@ -45,17 +45,28 @@ class TestStrategyGenerateKeywordList:
     await self.strategy.init()
     image_path = f"{os.getcwd()}/src/tests/test_images/windmill_address_some_none.NEF"
     keyword_list = [
-      "Meester Jac. Takkade",
-      "Netherlands",
       "background",
       "black",
       "blue",
+      "Meester Jac. Takkade",
+      "Netherlands",
       "sky",
       "white",
       "windmill",
     ]
-    save_output = await self.strategy.save_to_db(
+    save_output = await self.strategy.save(
       image_path=image_path, keyword_list=keyword_list
+    )
+    await clear_tables(engine=self.strategy.db_engine)
+    assert save_output
+
+  @pytest.mark.asyncio
+  async def test_generate_keyword_list_directory(self):
+    await self.strategy.init()
+    directory_path = f"{os.getcwd()}/src/tests/test_images"
+
+    save_output = await self.strategy.generate_keyword_list_directory(
+      root_dir=directory_path
     )
     await clear_tables(engine=self.strategy.db_engine)
     assert save_output
