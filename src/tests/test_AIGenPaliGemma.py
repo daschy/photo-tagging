@@ -15,7 +15,7 @@ class TestAIGenPaliGemma:
 
   @pytest.mark.asyncio
   async def test_generate(self):
-    img_path = f"{os.getcwd()}/src/tests/test_images/person_biking_no_gps.NEF"
+    img_path = f"{os.getcwd()}/src/tests/test_data/person_biking_no_gps.NEF"
     text = await self.ai_gen.generate_text(img_path, "caption")
     assert text is not None
     try:

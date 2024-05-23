@@ -1,6 +1,6 @@
 import os
 import pytest
-from src.tests.test_utils.test_db_utils import get_db_engine_and_session, clear_tables
+from src.tests.test_utils.test_db_utils import clear_tables
 from src.models.ReverseGeotagging import ReverseGeotagging
 from src.models.AIGenTokenClassificationBert import AIGenTokenClassificationBert
 from src.models.AIGenPaliGemma import AIGenPaliGemma
@@ -18,13 +18,13 @@ class TestStrategyGenerateKeywordList:
         model_id="vblagoje/bert-english-uncased-finetuned-pos",
       ),
       reverse_geotagging=ReverseGeotagging(),
-      db_path=f"sqlite+aiosqlite:////{os.getcwd()}/src/tests/test_images/test.db",
+      db_path=f"sqlite+aiosqlite:////{os.getcwd()}/src/tests/test_data/test.db",
     )
 
   @pytest.mark.asyncio
   async def test_generate_keyword_list_image(self):
     await self.strategy.init()
-    image_path = f"{os.getcwd()}/src/tests/test_images/windmill_address_some_none.NEF"
+    image_path = f"{os.getcwd()}/src/tests/test_data/windmill_address_some_none.NEF"
     keyword_list = await self.strategy.generate_keyword_list_image(
       image_path=image_path
     )
@@ -43,7 +43,7 @@ class TestStrategyGenerateKeywordList:
   @pytest.mark.asyncio
   async def test_save_keyword_list_image(self):
     await self.strategy.init()
-    image_path = f"{os.getcwd()}/src/tests/test_images/windmill_address_some_none.NEF"
+    image_path = f"{os.getcwd()}/src/tests/test_data/windmill_address_some_none.NEF"
     keyword_list = [
       "background",
       "black",
@@ -63,7 +63,7 @@ class TestStrategyGenerateKeywordList:
   @pytest.mark.asyncio
   async def test_generate_keyword_list_directory(self):
     await self.strategy.init()
-    directory_path = f"{os.getcwd()}/src/tests/test_images"
+    directory_path = f"{os.getcwd()}/src/tests/test_data"
 
     save_output = await self.strategy.generate_keyword_list_directory(
       root_dir=directory_path

@@ -2,8 +2,8 @@ import os
 from pathlib import Path
 from typing import List
 import asyncio
-from src.models.CrudBase import CRUDBase
-from src.models.Photo import Photo
+from src.models.orm.CrudBase import CRUDBase
+from src.models.orm.Photo import Photo
 from src.models.AIGenTokenClassificationBert import (
   TOKEN_TYPE,
   AIGenTokenClassificationBert,

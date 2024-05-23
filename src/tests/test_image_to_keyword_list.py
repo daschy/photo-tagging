@@ -8,7 +8,7 @@ from src.utils.image_to_keyword_list import (
 @pytest.mark.asyncio
 async def test_generate_keyword_list():
   result = await generate_keyword_list(
-    f"{os.getcwd()}/src/tests/test_images/person_biking_no_gps.NEF"
+    f"{os.getcwd()}/src/tests/test_data/person_biking_no_gps.NEF"
   )
 
   assert sorted(result) == sorted([
