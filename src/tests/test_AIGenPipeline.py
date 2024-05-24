@@ -1,17 +1,17 @@
 import pytest
-from src.models.AIGenTokenClassificationBert import (
+from src.models.AIGenPipeline import (
   TOKEN_TYPE,
-  AIGenTokenClassificationBert,
+  AIGenPipeline,
 )
 
 
-class TestAIGenTokenClassificationBert:
+class TestAIGenPipeline:
   ai_gen = None
 
   @classmethod
   def setup_class(cls):
     assert True
-    cls.ai_gen = AIGenTokenClassificationBert(
+    cls.ai_gen = AIGenPipeline(
       model_id="vblagoje/bert-english-uncased-finetuned-pos",
     )
     cls.ai_gen.ai_init()

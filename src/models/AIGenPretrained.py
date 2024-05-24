@@ -28,12 +28,12 @@ class AIGenPretrained(AIGen):
     ProcessorMixin,
   ]:
     self.logger.debug("start create model")
-    self.model = PreTrainedModel.from_pretrained(
+    self.model = PaliGemmaForConditionalGeneration.from_pretrained(
       self.model_id, token=os.environ.get("HF_TOKEN")
     )
     self.logger.debug("end create model")
     self.logger.debug("start create processor")
-    self.processor = ProcessorMixin.from_pretrained(self.model_id)
+    self.processor = PaliGemmaProcessor.from_pretrained(self.model_id)
     self.logger.debug("end create model")
     return self.model, self.processor
 

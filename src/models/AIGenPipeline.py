@@ -11,7 +11,7 @@ class TOKEN_TYPE(Enum):
   ADJ = "ADJ"
 
 
-class AIGenTokenClassificationBert(AIGen):
+class AIGenPipeline(AIGen):
   def __init__(self, model_id: str, aggregation_strategy: str = "simple"):
     super().__init__(model_id=model_id)
     self.aggregation_strategy = aggregation_strategy

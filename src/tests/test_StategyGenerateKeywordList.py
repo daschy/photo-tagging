@@ -8,7 +8,7 @@ from src.models.orm.CrudBase import CRUDBase
 from src.models.orm.BaseOrm import BaseOrm
 from src.tests.test_utils.test_utils import get_all_file_dir
 from src.models.ReverseGeotagging import ReverseGeotagging
-from src.models.AIGenTokenClassificationBert import AIGenTokenClassificationBert
+from src.models.AIGenPipeline import AIGenPipeline
 from src.models.AIGenPretrained import AIGenPretrained
 from src.models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
 from src.utils.db_utils_async import get_db_session
@@ -36,7 +36,7 @@ class TestStrategyGenerateKeywordList:
   async def strategy(self):
     output = StrategyGenerateKeywordList(
       image_to_text_ai=AIGenPretrained(model_id="google/paligemma-3b-ft-cococap-448"),
-      token_classification_ai=AIGenTokenClassificationBert(
+      token_classification_ai=AIGenPipeline(
         model_id="vblagoje/bert-english-uncased-finetuned-pos"
       ),
       reverse_geotagging=ReverseGeotagging(),
