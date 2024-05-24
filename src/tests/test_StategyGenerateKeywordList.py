@@ -14,10 +14,10 @@ from src.utils.db_utils_async import get_db_session
 
 
 class TestStrategyGenerateKeywordList:
-  image_path: str = os.path.join(
+  test_image_path: str = os.path.join(
     os.getcwd(), "src", "tests", "test_data", "windmill_address_some_none.NEF"
   )
-  keyword_list = [
+  test_keyword_list = [
     "background",
     "black",
     "blue",
@@ -27,19 +27,19 @@ class TestStrategyGenerateKeywordList:
     "white",
     "windmill",
   ]
-  directory_path: str = os.path.join(os.getcwd(), "src", "tests", "test_data")
-  extension_list = ["nef"]
+  test_data_path: str = os.path.join(os.getcwd(), "src", "tests", "test_data")
+  test_extension_list = ["jpg"]
+  test_db_path = os.path.join(os.getcwd(), "src", "tests", "test_data", "test.db")
 
   @pytest_asyncio.fixture(scope="function")
   async def strategy(self):
-    db_path = os.path.join(os.getcwd(), "src", "tests", "test_data", "test.db")
     output = StrategyGenerateKeywordList(
       image_to_text_ai=AIGenPaliGemma(model_id="google/paligemma-3b-ft-cococap-448"),
       token_classification_ai=AIGenTokenClassificationBert(
         model_id="vblagoje/bert-english-uncased-finetuned-pos"
       ),
       reverse_geotagging=ReverseGeotagging(),
-      db_path=f"sqlite+aiosqlite:////{db_path}",
+      db_path=f"sqlite+aiosqlite:////{self.test_data_path}",
     )
     await output.init()
     yield output
@@ -48,7 +48,7 @@ class TestStrategyGenerateKeywordList:
   @pytest_asyncio.fixture(scope="function")
   async def file_path_list(self):
     output = get_all_file_dir(
-      directory_path=self.directory_path, extension=self.extension_list[0]
+      directory_path=self.test_data_path, extension=self.test_extension_list[0]
     )
     image_crud = ImageCRUD()
     for image_path in output:
@@ -60,29 +60,29 @@ class TestStrategyGenerateKeywordList:
     self, strategy: StrategyGenerateKeywordList
   ):
     keyword_list = await strategy.generate_keyword_list_image(
-      image_path=self.image_path
+      image_path=self.test_image_path
     )
     assert len(keyword_list) > 0
-    assert keyword_list == self.keyword_list
+    assert keyword_list == self.test_keyword_list
 
   @pytest.mark.asyncio
   async def test_save_to_db(self, strategy: StrategyGenerateKeywordList):
     save_output = await strategy.save_to_db(
-      image_path=self.image_path, keyword_list=self.keyword_list
+      image_path=self.test_image_path, keyword_list=self.test_keyword_list
     )
     assert save_output
 
   @pytest.mark.asyncio
   async def test_save_to_file(self, strategy: StrategyGenerateKeywordList):
     save_output = await strategy.save_to_file(
-      image_path=self.image_path, keyword_list=self.keyword_list
+      image_path=self.test_image_path, keyword_list=self.test_keyword_list
     )
     assert save_output
     keyword_list_read_from_file = await strategy.image_crud.read_keyword_list(
-      self.image_path
+      self.test_image_path
     )
-    assert len(self.keyword_list) == len(keyword_list_read_from_file)
-    assert self.keyword_list == keyword_list_read_from_file
+    assert len(self.test_keyword_list) == len(keyword_list_read_from_file)
+    assert self.test_keyword_list == keyword_list_read_from_file
 
   async def validate_db_entries(self, db_engine, expected_count: int):
     session = get_db_session(db_engine)
@@ -97,7 +97,7 @@ class TestStrategyGenerateKeywordList:
     self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
   ):
     save_output = await strategy.generate_keyword_list_directory(
-      root_dir=self.directory_path, extension_list=self.extension_list
+      root_dir=self.test_data_path, extension_list=self.test_extension_list
     )
     assert save_output
     await self.validate_db_entries(
@@ -113,8 +113,8 @@ class TestStrategyGenerateKeywordList:
     self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
   ):
     save_output = await strategy.generate_keyword_list_directory(
-      root_dir=self.directory_path,
-      extension_list=self.extension_list,
+      root_dir=self.test_data_path,
+      extension_list=self.test_extension_list,
       save_on_db=False,
       save_on_file=False,
     )
@@ -131,8 +131,8 @@ class TestStrategyGenerateKeywordList:
     self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
   ):
     save_output = await strategy.generate_keyword_list_directory(
-      root_dir=self.directory_path,
-      extension_list=self.extension_list,
+      root_dir=self.test_data_path,
+      extension_list=self.test_extension_list,
       save_on_db=True,
       save_on_file=True,
     )
@@ -154,8 +154,8 @@ class TestStrategyGenerateKeywordList:
     self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
   ):
     save_output = await strategy.generate_keyword_list_directory(
-      root_dir=self.directory_path,
-      extension_list=self.extension_list,
+      root_dir=self.test_data_path,
+      extension_list=self.test_extension_list,
       save_on_db=False,
       save_on_file=True,
     )
