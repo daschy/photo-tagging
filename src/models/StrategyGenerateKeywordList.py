@@ -1,30 +1,29 @@
+import asyncio
 import os
 from glob import glob
 from typing import List
-import asyncio
+
+from src.models.AIGenPretrained import AIGenPretrained
+from src.models.AIGenTokenClassificationBert import (
+    TOKEN_TYPE, AIGenTokenClassificationBert)
+from src.models.ImageCRUD import ImageCRUD
 from src.models.orm.CrudBase import CRUDBase
 from src.models.orm.Photo import Photo
-from src.models.AIGenTokenClassificationBert import (
-  TOKEN_TYPE,
-  AIGenTokenClassificationBert,
-)
 from src.models.ReverseGeotagging import ReverseGeotagging
-from src.models.AIGenPaliGemma import AIGenPaliGemma
 from src.models.StrategyBase import StrategyBase
-from src.models.ImageCRUD import ImageCRUD
 from src.utils.db_utils_async import get_db_session, init_engine
 
 
 class StrategyGenerateKeywordList(StrategyBase):
   def __init__(
     self,
-    image_to_text_ai: AIGenPaliGemma,
+    image_to_text_ai: AIGenPretrained,
     token_classification_ai: AIGenTokenClassificationBert,
     reverse_geotagging: ReverseGeotagging,
     db_path: str,
   ):
     super().__init__()
-    self.image_to_text_ai: AIGenPaliGemma = image_to_text_ai
+    self.image_to_text_ai: AIGenPretrained = image_to_text_ai
     self.token_classification_ai: AIGenTokenClassificationBert = token_classification_ai
     self.reverse_geotagging: ReverseGeotagging = reverse_geotagging
     self.db_path = db_path

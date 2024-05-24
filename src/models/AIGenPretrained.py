@@ -2,12 +2,17 @@ import os
 from typing import Tuple
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
-from transformers import PaliGemmaForConditionalGeneration, PaliGemmaProcessor
+from transformers import (
+  PaliGemmaForConditionalGeneration,
+  PaliGemmaProcessor,
+  PreTrainedModel,
+  ProcessorMixin,
+)
 from src.models.AIGen import AIGen
 from PIL import Image
 
 
-class AIGenPaliGemma(AIGen):
+class AIGenPretrained(AIGen):
   def __init__(self, model_id: str):
     super().__init__(model_id=model_id)
 
@@ -19,16 +24,16 @@ class AIGenPaliGemma(AIGen):
   def ai_init(
     self,
   ) -> Tuple[
-    PaliGemmaForConditionalGeneration,
-    PaliGemmaProcessor,
+    PreTrainedModel,
+    ProcessorMixin,
   ]:
     self.logger.debug("start create model")
-    self.model = PaliGemmaForConditionalGeneration.from_pretrained(
+    self.model = PreTrainedModel.from_pretrained(
       self.model_id, token=os.environ.get("HF_TOKEN")
     )
     self.logger.debug("end create model")
     self.logger.debug("start create processor")
-    self.processor = PaliGemmaProcessor.from_pretrained(self.model_id)
+    self.processor = ProcessorMixin.from_pretrained(self.model_id)
     self.logger.debug("end create model")
     return self.model, self.processor
 

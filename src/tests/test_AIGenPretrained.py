@@ -1,14 +1,14 @@
 import os
 import pytest
-from src.models.AIGenPaliGemma import AIGenPaliGemma
+from src.models.AIGenPretrained import AIGenPretrained
 
 
-class TestAIGenPaliGemma:
+class TestAIGenPretrained:
   ai_gen = None
 
   @classmethod
   def setup_class(cls):
-    cls.ai_gen = AIGenPaliGemma("google/paligemma-3b-ft-cococap-448")
+    cls.ai_gen = AIGenPretrained("google/paligemma-3b-ft-cococap-448")
     cls.ai_gen.ai_init()
     assert cls.ai_gen.model is not None
     assert cls.ai_gen.processor is not None

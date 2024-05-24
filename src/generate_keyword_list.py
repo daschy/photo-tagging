@@ -1,7 +1,7 @@
 from logging import INFO
 import os
 import asyncio
-from src.models.AIGenPaliGemma import AIGenPaliGemma
+from models.AIGenPretrained import AIGenPretrained
 from src.models.AIGenTokenClassificationBert import AIGenTokenClassificationBert
 from src.models.ReverseGeotagging import ReverseGeotagging
 from src.models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
@@ -9,7 +9,7 @@ from src.models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
 
 async def main(root_dir: str):
   strategy = StrategyGenerateKeywordList(
-    image_to_text_ai=AIGenPaliGemma(
+    image_to_text_ai=AIGenPretrained(
       model_id="google/paligemma-3b-ft-cococap-448",
     ),
     token_classification_ai=AIGenTokenClassificationBert(
