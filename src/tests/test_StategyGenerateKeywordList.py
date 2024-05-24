@@ -4,7 +4,7 @@ import pytest_asyncio
 from typing import List
 from src.models.ImageCRUD import ImageCRUD
 from src.models.orm.Photo import Photo
-from src.models.orm.CrudBase import CRUDBase
+from src.models.DBCRUD import DBCRUD
 from src.models.orm.BaseOrm import BaseOrm
 from src.tests.test_utils.test_utils import get_all_file_dir
 from src.models.ReverseGeotagging import ReverseGeotagging
@@ -89,7 +89,7 @@ class TestStrategyGenerateKeywordList:
   async def validate_db_entries(self, db_engine, expected_count: int):
     session = get_db_session(db_engine)
     async with session() as db:
-      photo_crud = CRUDBase(Photo)
+      photo_crud = DBCRUD(Photo)
       saved_entries = await photo_crud.get_all(db)
       assert len(saved_entries) == expected_count
       return saved_entries

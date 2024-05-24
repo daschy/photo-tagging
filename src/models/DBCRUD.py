@@ -8,7 +8,7 @@ from src.models.orm.BaseOrm import BaseOrm
 T = TypeVar("T", bound=BaseOrm)
 
 
-class CRUDBase(Base, Generic[T]):
+class DBCRUD(Base, Generic[T]):
   def __init__(self, model: Type[T]):
     super().__init__()
     self.model = model

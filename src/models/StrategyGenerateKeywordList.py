@@ -6,7 +6,7 @@ from typing import List
 from src.models.AIGenPretrained import AIGenPretrained
 from src.models.AIGenPipeline import TOKEN_TYPE, AIGenPipeline
 from src.models.ImageCRUD import ImageCRUD
-from src.models.orm.CrudBase import CRUDBase
+from src.models.DBCRUD import DBCRUD
 from src.models.orm.Photo import Photo
 from src.models.ReverseGeotagging import ReverseGeotagging
 from src.models.StrategyBase import StrategyBase
@@ -82,7 +82,7 @@ class StrategyGenerateKeywordList(StrategyBase):
     try:
       session = get_db_session(self.db_engine)
       async with session() as db:
-        photo_crud = CRUDBase(Photo)
+        photo_crud = DBCRUD(Photo)
         new_photo = Photo(image_path)
         new_photo.set_keyword_list(keyword_list)
         await photo_crud.create(db, new_photo)
@@ -125,7 +125,7 @@ class StrategyGenerateKeywordList(StrategyBase):
       image_path = file_name  # os.path.join(subdir, file_name)
       session = get_db_session(self.db_engine)
       async with session() as db:
-        photo_crud = CRUDBase(Photo)
+        photo_crud = DBCRUD(Photo)
         retrieved_photo = await photo_crud.get_by(db, path=image_path)
       if retrieved_photo is None:
         keyword_list = await self.generate_keyword_list_image(image_path=image_path)
