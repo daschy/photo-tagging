@@ -1,5 +1,7 @@
 import os
 import pytest
+import pytest_asyncio
+from typing import List
 from src.models.ImageCRUD import ImageCRUD
 from src.models.orm.Photo import Photo
 from src.models.orm.CrudBase import CRUDBase
@@ -12,209 +14,155 @@ from src.utils.db_utils_async import get_db_session
 
 
 class TestStrategyGenerateKeywordList:
-  strategy: StrategyGenerateKeywordList = None
+  image_path: str = os.path.join(
+    os.getcwd(), "src", "tests", "test_data", "windmill_address_some_none.NEF"
+  )
+  keyword_list = [
+    "background",
+    "black",
+    "blue",
+    "Meester Jac. Takkade",
+    "Netherlands",
+    "sky",
+    "white",
+    "windmill",
+  ]
+  directory_path: str = os.path.join(os.getcwd(), "src", "tests", "test_data")
+  extension_list = ["nef"]
 
-  @classmethod
-  def setup_class(cls):
+  @pytest_asyncio.fixture(scope="function")
+  async def strategy(self):
     db_path = os.path.join(os.getcwd(), "src", "tests", "test_data", "test.db")
-    cls.strategy = StrategyGenerateKeywordList(
+    output = StrategyGenerateKeywordList(
       image_to_text_ai=AIGenPaliGemma(model_id="google/paligemma-3b-ft-cococap-448"),
       token_classification_ai=AIGenTokenClassificationBert(
-        model_id="vblagoje/bert-english-uncased-finetuned-pos",
+        model_id="vblagoje/bert-english-uncased-finetuned-pos"
       ),
       reverse_geotagging=ReverseGeotagging(),
       db_path=f"sqlite+aiosqlite:////{db_path}",
     )
+    await output.init()
+    yield output
+    await clear_tables(engine=output.db_engine)
+
+  @pytest_asyncio.fixture(scope="function")
+  async def file_path_list(self):
+    output = get_all_file_dir(
+      directory_path=self.directory_path, extension=self.extension_list[0]
+    )
+    image_crud = ImageCRUD()
+    for image_path in output:
+      await image_crud.delete_all_keyword_list(file_path=image_path)
+    yield output
 
   @pytest.mark.asyncio
-  async def test_generate_keyword_list_image(self):
-    await self.strategy.init()
-    image_path = os.path.join(
-      os.getcwd(), "src", "tests", "test_data", "windmill_address_some_none.NEF"
-    )
-    keyword_list = await self.strategy.generate_keyword_list_image(
-      image_path=image_path
+  async def test_generate_keyword_list_image(
+    self, strategy: StrategyGenerateKeywordList
+  ):
+    keyword_list = await strategy.generate_keyword_list_image(
+      image_path=self.image_path
     )
     assert len(keyword_list) > 0
-    assert [
-      "background",
-      "black",
-      "blue",
-      "Meester Jac. Takkade",
-      "Netherlands",
-      "sky",
-      "white",
-      "windmill",
-    ] == keyword_list
+    assert keyword_list == self.keyword_list
 
   @pytest.mark.asyncio
-  async def test_save_to_db(self):
-    await self.strategy.init()
-    image_path = os.path.join(
-      os.getcwd(), "src", "tests", "test_data", "windmill_address_some_none.NEF"
+  async def test_save_to_db(self, strategy: StrategyGenerateKeywordList):
+    save_output = await strategy.save_to_db(
+      image_path=self.image_path, keyword_list=self.keyword_list
     )
-    keyword_list = [
-      "background",
-      "black",
-      "blue",
-      "Meester Jac. Takkade",
-      "Netherlands",
-      "sky",
-      "white",
-      "windmill",
-    ]
-    save_output = await self.strategy.save_to_db(
-      image_path=image_path, keyword_list=keyword_list
-    )
-    await clear_tables(engine=self.strategy.db_engine)
     assert save_output
 
   @pytest.mark.asyncio
-  async def test_save_to_file(self):
-    await self.strategy.init()
-    image_path = os.path.join(
-      os.getcwd(), "src", "tests", "test_data", "windmill_address_some_none.NEF"
-    )
-    keyword_list = [
-      "background",
-      "black",
-      "blue",
-      "Meester Jac. Takkade",
-      "Netherlands",
-      "sky",
-      "white",
-      "windmill",
-    ]
-    save_output = await self.strategy.save_to_file(
-      image_path=image_path, keyword_list=keyword_list
+  async def test_save_to_file(self, strategy: StrategyGenerateKeywordList):
+    save_output = await strategy.save_to_file(
+      image_path=self.image_path, keyword_list=self.keyword_list
     )
     assert save_output
-    keyword_list_read_from_file = await self.strategy.image_crud.read_keyword_list(
-      image_path
+    keyword_list_read_from_file = await strategy.image_crud.read_keyword_list(
+      self.image_path
     )
-    assert len(keyword_list) == len(keyword_list_read_from_file)
-    assert keyword_list == keyword_list_read_from_file
+    assert len(self.keyword_list) == len(keyword_list_read_from_file)
+    assert self.keyword_list == keyword_list_read_from_file
 
-  @pytest.mark.asyncio
-  async def test_generate_keyword_list_directory_do_save_on_db_only(self):
-    await self.strategy.init()
-    directory_path = os.path.join(os.getcwd(), "src", "tests", "test_data")
-    extension_list = ["nef"]
-    save_output = await self.strategy.generate_keyword_list_directory(
-      root_dir=directory_path, extension_list=extension_list
-    )
-    assert save_output
-    image_path_list = get_all_file_dir(
-      directory_path=directory_path, extension=extension_list[0]
-    )
-    session = get_db_session(self.strategy.db_engine)
+  async def validate_db_entries(self, db_engine, expected_count: int):
+    session = get_db_session(db_engine)
     async with session() as db:
       photo_crud = CRUDBase(Photo)
       saved_entries = await photo_crud.get_all(db)
-      assert len(saved_entries) == len(image_path_list)
-
-    image_path_list = get_all_file_dir(
-      directory_path=directory_path, extension=extension_list[0]
-    )
-
-    image_crud = ImageCRUD()
-    for image_path in image_path_list:
-      file_keyword_list = await image_crud.read_keyword_list(image_path=image_path)
-      assert len(file_keyword_list) == 0
-
-    await clear_tables(engine=self.strategy.db_engine)
-    for image_path in image_path_list:
-      await image_crud.delete_all_keyword_list(file_path=image_path)
+      assert len(saved_entries) == expected_count
+      return saved_entries
 
   @pytest.mark.asyncio
-  async def test_generate_keyword_list_directory_do_not_save_on_neither(self):
-    await self.strategy.init()
-    directory_path = os.path.join(os.getcwd(), "src", "tests", "test_data")
-    extension_list = ["nef"]
-    save_output = await self.strategy.generate_keyword_list_directory(
-      root_dir=directory_path,
-      extension_list=extension_list,
+  async def test_generate_keyword_list_directory_do_save_on_db_only(
+    self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
+  ):
+    save_output = await strategy.generate_keyword_list_directory(
+      root_dir=self.directory_path, extension_list=self.extension_list
+    )
+    assert save_output
+    await self.validate_db_entries(
+      db_engine=strategy.db_engine, expected_count=len(file_path_list)
+    )
+    image_crud = ImageCRUD()
+    for image_path in file_path_list:
+      file_keyword_list = await image_crud.read_keyword_list(file_path=image_path)
+      assert len(file_keyword_list) == 0
+
+  @pytest.mark.asyncio
+  async def test_generate_keyword_list_directory_do_not_save_on_neither(
+    self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
+  ):
+    save_output = await strategy.generate_keyword_list_directory(
+      root_dir=self.directory_path,
+      extension_list=self.extension_list,
       save_on_db=False,
       save_on_file=False,
     )
     assert save_output
 
-    image_path_list = get_all_file_dir(
-      directory_path=directory_path, extension=extension_list[0]
-    )
-    session = get_db_session(self.strategy.db_engine)
-    async with session() as db:
-      photo_crud = CRUDBase(Photo)
-      saved_entries = await photo_crud.get_all(db)
-
-    assert len(saved_entries) == 0
-
+    await self.validate_db_entries(db_engine=strategy.db_engine, expected_count=0)
     image_crud = ImageCRUD()
-    for image_path in image_path_list:
-      file_keyword_list = await image_crud.read_keyword_list(image_path=image_path)
+    for image_path in file_path_list:
+      file_keyword_list = await image_crud.read_keyword_list(file_path=image_path)
       assert len(file_keyword_list) == 0
 
-    await clear_tables(engine=self.strategy.db_engine)
-    for image_path in image_path_list:
-      await image_crud.delete_all_keyword_list(file_path=image_path)
-
   @pytest.mark.asyncio
-  async def test_generate_keyword_list_directory_do_save_on_both(self):
-    await self.strategy.init()
-    directory_path = os.path.join(os.getcwd(), "src", "tests", "test_data")
-    extension_list = ["nef"]
-    save_output = await self.strategy.generate_keyword_list_directory(
-      root_dir=directory_path,
-      extension_list=extension_list,
+  async def test_generate_keyword_list_directory_do_save_on_both(
+    self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
+  ):
+    save_output = await strategy.generate_keyword_list_directory(
+      root_dir=self.directory_path,
+      extension_list=self.extension_list,
       save_on_db=True,
       save_on_file=True,
     )
     assert save_output
 
-    image_path_list = get_all_file_dir(
-      directory_path=directory_path, extension=extension_list[0]
+    saved_entries = await self.validate_db_entries(
+      db_engine=strategy.db_engine, expected_count=len(file_path_list)
     )
-    session = get_db_session(self.strategy.db_engine)
-    async with session() as db:
-      photo_crud = CRUDBase(Photo)
-      saved_entries = await photo_crud.get_all(db)
-    assert len(saved_entries) == len(image_path_list)
+
     image_crud = ImageCRUD()
-    for image_path in image_path_list:
-      file_keyword_list = await image_crud.read_keyword_list(image_path=image_path)
-      photo_entry = next(x for x in saved_entries if x.path == image_path)
+    for file_path in file_path_list:
+      file_keyword_list = await image_crud.read_keyword_list(file_path=file_path)
+      photo_entry = next(x for x in saved_entries if x.path == file_path)
       assert len(file_keyword_list) == len(photo_entry.keyword_list)
       assert file_keyword_list == photo_entry.keyword_list
 
-    await clear_tables(engine=self.strategy.db_engine)
-    for image_path in image_path_list:
-      await image_crud.delete_all_keyword_list(file_path=image_path)
-
   @pytest.mark.asyncio
-  async def test_generate_keyword_list_directory_do_save_on_file_only(self):
-    await self.strategy.init()
-    directory_path = os.path.join(os.getcwd(), "src", "tests", "test_data")
-    extension_list = ["nef"]
-    save_output = await self.strategy.generate_keyword_list_directory(
-      root_dir=directory_path,
-      extension_list=extension_list,
+  async def test_generate_keyword_list_directory_do_save_on_file_only(
+    self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
+  ):
+    save_output = await strategy.generate_keyword_list_directory(
+      root_dir=self.directory_path,
+      extension_list=self.extension_list,
       save_on_db=False,
       save_on_file=True,
     )
     assert save_output
 
-    image_path_list = get_all_file_dir(
-      directory_path=directory_path, extension=extension_list[0]
-    )
-    session = get_db_session(self.strategy.db_engine)
-    async with session() as db:
-      photo_crud = CRUDBase(Photo)
-      saved_entries = await photo_crud.get_all(db)
-    assert len(saved_entries) == 0
-
+    await self.validate_db_entries(db_engine=strategy.db_engine, expected_count=0)
     image_crud = ImageCRUD()
-    for image_path in image_path_list:
-      file_keyword_list = await image_crud.read_keyword_list(image_path=image_path)
+    for image_path in file_path_list:
+      file_keyword_list = await image_crud.read_keyword_list(file_path=image_path)
       assert len(file_keyword_list) > 0
-
-    await clear_tables(engine=self.strategy.db_engine)

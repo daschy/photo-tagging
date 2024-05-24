@@ -34,7 +34,7 @@ class ImageCRUD(Base):
     return True
 
   async def delete_all_keyword_list(self, file_path) -> bool:
-    existing_keyword_list = await self.read_keyword_list(image_path=file_path)
+    existing_keyword_list = await self.read_keyword_list(file_path=file_path)
     process = await asyncio.create_subprocess_exec(
       "exiftool",
       *([f"-{EXIF_TAG_KEYWORDS}-={keyword}" for keyword in existing_keyword_list]),
@@ -53,12 +53,12 @@ class ImageCRUD(Base):
       os.remove(backup_file)
     return True
 
-  async def read_keyword_list(self, image_path) -> List[str]:
+  async def read_keyword_list(self, file_path) -> List[str]:
     process = await asyncio.create_subprocess_exec(
       "exiftool",
       f"-{EXIF_TAG_KEYWORDS}",
       "-json",
-      image_path,
+      file_path,
       stdout=asyncio.subprocess.PIPE,
       stderr=asyncio.subprocess.PIPE,
     )
