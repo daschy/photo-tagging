@@ -5,7 +5,8 @@ from typing import List
 from src.models.ImageCRUD import ImageCRUD
 from src.models.orm.Photo import Photo
 from src.models.orm.CrudBase import CRUDBase
-from src.tests.test_utils.test_utils import clear_tables, get_all_file_dir
+from src.models.orm.BaseOrm import BaseOrm
+from src.tests.test_utils.test_utils import get_all_file_dir
 from src.models.ReverseGeotagging import ReverseGeotagging
 from src.models.AIGenTokenClassificationBert import AIGenTokenClassificationBert
 from src.models.AIGenPaliGemma import AIGenPaliGemma
@@ -28,7 +29,7 @@ class TestStrategyGenerateKeywordList:
     "windmill",
   ]
   test_data_path: str = os.path.join(os.getcwd(), "src", "tests", "test_data")
-  test_extension_list = ["jpg"]
+  test_extension_list = ["nef"]
   test_db_path = os.path.join(os.getcwd(), "src", "tests", "test_data", "test.db")
 
   @pytest_asyncio.fixture(scope="function")
@@ -39,11 +40,12 @@ class TestStrategyGenerateKeywordList:
         model_id="vblagoje/bert-english-uncased-finetuned-pos"
       ),
       reverse_geotagging=ReverseGeotagging(),
-      db_path=f"sqlite+aiosqlite:////{self.test_data_path}",
+      db_path=f"sqlite+aiosqlite:////{self.test_db_path}",
     )
     await output.init()
     yield output
-    await clear_tables(engine=output.db_engine)
+    async with output.db_engine.begin() as conn:
+      await conn.run_sync(BaseOrm.metadata.drop_all)
 
   @pytest_asyncio.fixture(scope="function")
   async def file_path_list(self):
