@@ -1,5 +1,6 @@
 [project]
 dynamic = ["dependencies", "optional-dependencies"]
+
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
 optional-dependencies = { dev = { file = ["requirements-dev.txt"] } }
@@ -10,3 +11,33 @@ indent-width = 2
 
 [tool.ruff.lint]
 exclude = ["./*"]
+
+[tool.poetry]
+name = "milotagging"
+version = "0.1.0"
+description = ""
+authors = ["miloertola <milo@redbabel.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+coloredlogs = "15.0.1"
+exifread = "3.0.0"
+geopy = "2.4.1"
+gliner = "0.1.13"
+pillow = "10.3.0"
+prettyprinter = "0.18.0"
+requests = "2.31.0"
+sqlalchemy = "2.0.30"
+torch = "2.3.0"
+transformers = "4.41.0"
+aiosqlite = "0.20.0"
+greenlet = "3.0.3"
+pytest-asyncio = "0.23.7"
+pytest = "8.2.1"
+pyexiftool = "0.5.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
