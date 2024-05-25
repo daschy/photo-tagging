@@ -6,17 +6,17 @@ from src.models.ImageCRUD import ImageCRUD
 from src.models.orm.Photo import Photo
 from src.models.DBCRUD import DBCRUD
 from src.models.orm.BaseOrm import BaseOrm
-from src.tests.test_utils.test_utils import get_all_file_dir
 from src.models.ReverseGeotagging import ReverseGeotagging
 from src.models.AIGenPipeline import AIGenPipeline
 from src.models.AIGenPretrained import AIGenPretrained
 from src.models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
 from src.utils.db_utils_async import get_db_session
+from test_utils.test_utils import get_all_file_dir
 
 
 class TestStrategyGenerateKeywordList:
   test_image_path: str = os.path.join(
-    os.getcwd(), "src", "tests", "test_data", "windmill_address_some_none.NEF"
+    os.getcwd(), "tests", "test_data", "windmill_address_some_none.NEF"
   )
   test_keyword_list = [
     "background",
@@ -28,9 +28,9 @@ class TestStrategyGenerateKeywordList:
     "white",
     "windmill",
   ]
-  test_data_path: str = os.path.join(os.getcwd(), "src", "tests", "test_data")
+  test_data_path: str = os.path.join(os.getcwd(), "tests", "test_data")
   test_extension_list = ["nef"]
-  test_db_path = os.path.join(os.getcwd(), "src", "tests", "test_data", "test.db")
+  test_db_path = os.path.join(os.getcwd(), "tests", "test_data", "test.db")
 
   @pytest_asyncio.fixture(scope="function")
   async def strategy(self):
