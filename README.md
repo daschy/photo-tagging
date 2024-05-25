@@ -24,12 +24,14 @@ Photo Tagging is a Python project that allows you to generate and write EXIF key
 2. **Install the required Python packages:**
 
    ```sh
-   pip install -r requirements.txt
+   brew install exiftool
    ```
 
    ```sh
-   brew install exiftool
+   pip install poetry
+   poetry install 
    ```
+
 
 ## Contributing
 
