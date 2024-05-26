@@ -16,9 +16,6 @@ from models.StrategyBase import StrategyBase
 from utils.db_utils_async import get_db_session, init_engine
 
 
-KEYWORD_LIST_DB_FILE_NAME: str = "keyword_list.db"
-
-
 class StrategyGenerateKeywordList(StrategyBase):
 	def __init__(
 		self,
@@ -39,6 +36,11 @@ class StrategyGenerateKeywordList(StrategyBase):
 			raise ValueError("image_to_text_ai is not initialized")
 		if self.token_classification_ai.is_init() is False:
 			raise ValueError("token_classification_ai is not initialized")
+
+	def get_db_name(self) -> str:
+		image_to_text_ai_name = self.image_to_text_ai.model_id.replace("/", "_")
+		token_classification_ai = self.token_classification_ai.model_id.replace("/", "_")
+		return f"keywords__{image_to_text_ai_name}__{token_classification_ai}.db"
 
 	async def generate_keyword_list_image(self, image_path: str) -> List[str]:
 		try:
@@ -117,7 +119,7 @@ class StrategyGenerateKeywordList(StrategyBase):
 				pattern,
 				recursive=True,
 			)
-		engine_path: str = os.path.join(directory_path, KEYWORD_LIST_DB_FILE_NAME)
+		engine_path: str = os.path.join(directory_path, self.get_db_name())
 		engine_conn_str: str = f"sqlite+aiosqlite:////{engine_path}"
 		db_engine: AsyncEngine = await init_engine(engine_conn_str)
 		session = get_db_session(db_engine)

@@ -1,4 +1,5 @@
 import os
+import glob
 import pytest
 import pytest_asyncio
 from typing import List
@@ -8,7 +9,6 @@ from models.orm.Photo import Photo
 from models.DBCRUD import DBCRUD
 from models.orm.BaseOrm import BaseOrm
 from models.StrategyGenerateKeywordList import (
-	KEYWORD_LIST_DB_FILE_NAME,
 	StrategyGenerateKeywordList,
 )
 from utils.db_utils_async import get_db_session, init_engine
@@ -33,8 +33,8 @@ class TestStrategyGenerateKeywordList:
 	test_extension_list = ["nef"]
 
 	@pytest_asyncio.fixture(scope="function")
-	async def test_db(self):
-		test_db_path: str = os.path.join(self.test_data_path, KEYWORD_LIST_DB_FILE_NAME)
+	async def test_db(self, strategy: StrategyGenerateKeywordList):
+		test_db_path: str = os.path.join(self.test_data_path, strategy.get_db_name())
 		test_db_conn_str: str = f"sqlite+aiosqlite:////{test_db_path}"
 		engine = await init_engine(test_db_conn_str)
 		sessionmaker = get_db_session(engine=engine)
@@ -151,7 +151,7 @@ class TestStrategyGenerateKeywordList:
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
 		test_db: AsyncSession,
-		image_crud: ImageCRUD
+		image_crud: ImageCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_data_path,
@@ -175,7 +175,7 @@ class TestStrategyGenerateKeywordList:
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
 		test_db: AsyncSession,
-		image_crud: ImageCRUD
+		image_crud: ImageCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_data_path,
