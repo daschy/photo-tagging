@@ -48,10 +48,13 @@ indent-style = "tab"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra --verbose"
 testpaths = [
     "tests",
 ]
 pythonpath = [
 	"src"
+]
+addopts = [
+		"-ra",
+		"--verbose"
 ]

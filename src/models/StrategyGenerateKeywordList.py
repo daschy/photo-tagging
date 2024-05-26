@@ -5,7 +5,6 @@ from typing import List
 import itertools
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
 
-from models.AIGen import AIGen
 from models.orm.Photo import Photo
 from models.AIGenPretrained import AIGenPretrained
 from models.AIGenPipeline import TOKEN_TYPE, AIGenPipeline
@@ -23,21 +22,17 @@ KEYWORD_LIST_DB_FILE_NAME: str = "keyword_list.db"
 class StrategyGenerateKeywordList(StrategyBase):
 	def __init__(
 		self,
-		image_to_text_ai: AIGen,
-		token_classification_ai: AIGen,
+		image_to_text_ai: AIGenPretrained,
+		token_classification_ai: AIGenPipeline,
 		reverse_geotagging: ReverseGeotagging,
 	):
 		super().__init__()
-		self.image_to_text_ai: AIGen = image_to_text_ai
+		self.image_to_text_ai: AIGenPretrained = image_to_text_ai
 		self.image_to_text_ai.ai_init()
-		self.token_classification_ai: AIGen = token_classification_ai
+		self.token_classification_ai: AIGenPipeline = token_classification_ai
 		self.token_classification_ai.ai_init()
 		self.reverse_geotagging: ReverseGeotagging = reverse_geotagging
 		self.image_crud = ImageCRUD()
-
-	async def init(self):
-		self.image_to_text_ai.ai_init()
-		self.token_classification_ai.ai_init()
 
 	def _check_init(self):
 		if self.image_to_text_ai.is_init() is False:

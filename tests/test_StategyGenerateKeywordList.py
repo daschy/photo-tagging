@@ -7,9 +7,6 @@ from models.ImageCRUD import ImageCRUD
 from models.orm.Photo import Photo
 from models.DBCRUD import DBCRUD
 from models.orm.BaseOrm import BaseOrm
-from models.ReverseGeotagging import ReverseGeotagging
-from models.AIGenPipeline import AIGenPipeline
-from models.AIGenPretrained import AIGenPretrained
 from models.StrategyGenerateKeywordList import (
 	KEYWORD_LIST_DB_FILE_NAME,
 	StrategyGenerateKeywordList,
@@ -46,17 +43,17 @@ class TestStrategyGenerateKeywordList:
 		async with engine.begin() as conn:
 			await conn.run_sync(BaseOrm.metadata.drop_all)
 
-	@pytest_asyncio.fixture(scope="class")
-	async def strategy(self):
-		output = StrategyGenerateKeywordList(
-			image_to_text_ai=AIGenPretrained(model_id="google/paligemma-3b-ft-cococap-448"),
-			token_classification_ai=AIGenPipeline(
-				model_id="vblagoje/bert-english-uncased-finetuned-pos"
-			),
-			reverse_geotagging=ReverseGeotagging(),
-		)
-		await output.init()
-		yield output
+	# @pytest_asyncio.fixture(scope="class")
+	# async def strategy(self):
+	# 	output = StrategyGenerateKeywordList(
+	# 		image_to_text_ai=AIGenPretrained(model_id="google/paligemma-3b-ft-cococap-448"),
+	# 		token_classification_ai=AIGenPipeline(
+	# 			model_id="vblagoje/bert-english-uncased-finetuned-pos"
+	# 		),
+	# 		reverse_geotagging=ReverseGeotagging(),
+	# 	)
+	# 	# await output.init()
+	# 	yield output
 
 	@pytest_asyncio.fixture(scope="function")
 	async def file_path_list(self):
@@ -114,6 +111,7 @@ class TestStrategyGenerateKeywordList:
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
 		test_db: AsyncSession,
+		image_crud: ImageCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_data_path, extension_list=self.test_extension_list
@@ -121,7 +119,6 @@ class TestStrategyGenerateKeywordList:
 		assert save_output
 		saved_entries: List[Photo] = await self.retrieve_test_db_entries(db=test_db)
 		assert len(saved_entries) == len(file_path_list)
-		image_crud = ImageCRUD()
 		for image_path in file_path_list:
 			file_keyword_list = await image_crud.read_keyword_list(file_path=image_path)
 			assert len(file_keyword_list) == 0
@@ -132,6 +129,7 @@ class TestStrategyGenerateKeywordList:
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
 		test_db: AsyncSession,
+		image_crud: ImageCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_data_path,
@@ -143,7 +141,6 @@ class TestStrategyGenerateKeywordList:
 
 		saved_entries = await self.retrieve_test_db_entries(db=test_db)
 		assert len(saved_entries) == 0
-		image_crud = ImageCRUD()
 		for image_path in file_path_list:
 			file_keyword_list = await image_crud.read_keyword_list(file_path=image_path)
 			assert len(file_keyword_list) == 0
@@ -154,6 +151,7 @@ class TestStrategyGenerateKeywordList:
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
 		test_db: AsyncSession,
+		image_crud: ImageCRUD
 	):
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_data_path,
@@ -165,7 +163,6 @@ class TestStrategyGenerateKeywordList:
 
 		saved_entries = await self.retrieve_test_db_entries(db=test_db)
 		assert len(saved_entries) == len(file_path_list)
-		image_crud = ImageCRUD()
 		for file_path in file_path_list:
 			file_keyword_list = await image_crud.read_keyword_list(file_path=file_path)
 			photo_entry = next(x for x in saved_entries if x.path == file_path)
@@ -178,6 +175,7 @@ class TestStrategyGenerateKeywordList:
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
 		test_db: AsyncSession,
+		image_crud: ImageCRUD
 	):
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_data_path,
@@ -189,7 +187,6 @@ class TestStrategyGenerateKeywordList:
 
 		saved_entries: List[Photo] = await self.retrieve_test_db_entries(db=test_db)
 		assert len(saved_entries) == 0
-		image_crud = ImageCRUD()
 		for image_path in file_path_list:
 			file_keyword_list = await image_crud.read_keyword_list(file_path=image_path)
 			assert len(file_keyword_list) > 0
