@@ -1,5 +1,3 @@
-from logging import INFO
-import os
 import asyncio
 from models.AIGenPretrained import AIGenPretrained
 from models.AIGenPipeline import AIGenPipeline
