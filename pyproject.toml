@@ -36,9 +36,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.ruff]
 indent-width = 2
+src = ["src", "tests"]
 
 [tool.ruff.lint]
-exclude = ["./*"]
+exclude = ["./**"]
+
+[tool.ruff.format]
+# Use tabs instead of 4 space indentation.
+indent-style = "tab"
 
 
 [tool.pytest.ini_options]

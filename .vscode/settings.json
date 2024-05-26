@@ -10,4 +10,7 @@
 	"python.testing.unittestEnabled": false,
 	"python.analysis.typeCheckingMode": "standard",
 	"python.analysis.enablePytestSupport": true,
+	"python.linting.pylintArgs": [
+		"--indent-string='\	'"
+	],
 }
