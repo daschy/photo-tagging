@@ -19,14 +19,11 @@ class AIGenPretrained(AIGen):
   def is_init(
     self,
   ) -> bool:
-    return self.model and self.processor
+    return self.model is not None and self.processor is not None
 
   def ai_init(
     self,
-  ) -> Tuple[
-    PreTrainedModel,
-    ProcessorMixin,
-  ]:
+  ) -> None:
     self.logger.debug("start create model")
     self.model = PaliGemmaForConditionalGeneration.from_pretrained(
       self.model_id, token=os.environ.get("HF_TOKEN")
@@ -35,7 +32,6 @@ class AIGenPretrained(AIGen):
     self.logger.debug("start create processor")
     self.processor = PaliGemmaProcessor.from_pretrained(self.model_id)
     self.logger.debug("end create model")
-    return self.model, self.processor
 
   async def generate_text(self, img_path: str, prompt: str) -> str:
     with Image.open(img_path) as image:

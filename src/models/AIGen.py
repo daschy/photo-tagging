@@ -21,5 +21,5 @@ class AIGen(Base, Generic[ModelT, ProcessorT]):
     pass
 
   @abstractmethod
-  def ai_init(self) -> Tuple[ModelT, ProcessorT]:
+  def ai_init(self) -> None:
     pass
