@@ -2,8 +2,8 @@ import exifread
 from typing import List
 from geopy.geocoders import Nominatim
 
-from src.models.Base import Base
-from src.models.Location import Location
+from models.Base import Base
+from models.Location import Location
 
 
 class ReverseGeotagging(Base):

@@ -1,5 +1,5 @@
 import pytest
-from src.models.AIGenPipeline import (
+from models.AIGenPipeline import (
   TOKEN_TYPE,
   AIGenPipeline,
 )

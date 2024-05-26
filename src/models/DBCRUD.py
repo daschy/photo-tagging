@@ -2,8 +2,8 @@
 from typing import Type, TypeVar, Generic, List
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models.Base import Base
-from src.models.orm.BaseOrm import BaseOrm
+from models.Base import Base
+from models.orm.BaseOrm import BaseOrm
 
 T = TypeVar("T", bound=BaseOrm)
 

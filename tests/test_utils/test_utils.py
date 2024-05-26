@@ -4,7 +4,7 @@ from glob import glob
 import os
 
 # from sqlalchemy import create_engine
-from src.models.orm.BaseOrm import BaseOrm
+from models.orm.BaseOrm import BaseOrm
 
 
 async def clear_tables(engine: AsyncEngine) -> None:

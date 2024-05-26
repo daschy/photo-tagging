@@ -2,15 +2,15 @@ import os
 import pytest
 import pytest_asyncio
 from typing import List
-from src.models.ImageCRUD import ImageCRUD
-from src.models.orm.Photo import Photo
-from src.models.DBCRUD import DBCRUD
-from src.models.orm.BaseOrm import BaseOrm
-from src.models.ReverseGeotagging import ReverseGeotagging
-from src.models.AIGenPipeline import AIGenPipeline
-from src.models.AIGenPretrained import AIGenPretrained
-from src.models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
-from src.utils.db_utils_async import get_db_session
+from models.ImageCRUD import ImageCRUD
+from models.orm.Photo import Photo
+from models.DBCRUD import DBCRUD
+from models.orm.BaseOrm import BaseOrm
+from models.ReverseGeotagging import ReverseGeotagging
+from models.AIGenPipeline import AIGenPipeline
+from models.AIGenPretrained import AIGenPretrained
+from models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
+from utils.db_utils_async import get_db_session
 from tests.test_utils.test_utils import get_all_file_dir
 
 

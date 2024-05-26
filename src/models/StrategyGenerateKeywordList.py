@@ -4,15 +4,15 @@ from glob import glob
 from typing import List
 import itertools
 
-from src.models.orm.Photo import Photo
-from src.models.AIGenPretrained import AIGenPretrained
-from src.models.AIGenPipeline import TOKEN_TYPE, AIGenPipeline
-from src.models.ImageCRUD import ImageCRUD
-from src.models.DBCRUD import DBCRUD
+from models.orm.Photo import Photo
+from models.AIGenPretrained import AIGenPretrained
+from models.AIGenPipeline import TOKEN_TYPE, AIGenPipeline
+from models.ImageCRUD import ImageCRUD
+from models.DBCRUD import DBCRUD
 
-from src.models.ReverseGeotagging import ReverseGeotagging
-from src.models.StrategyBase import StrategyBase
-from src.utils.db_utils_async import get_db_session, init_engine
+from models.ReverseGeotagging import ReverseGeotagging
+from models.StrategyBase import StrategyBase
+from utils.db_utils_async import get_db_session, init_engine
 
 
 class StrategyGenerateKeywordList(StrategyBase):

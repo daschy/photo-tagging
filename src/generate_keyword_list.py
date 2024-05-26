@@ -1,10 +1,10 @@
 from logging import INFO
 import os
 import asyncio
-from src.models.AIGenPretrained import AIGenPretrained
-from src.models.AIGenPipeline import AIGenPipeline
-from src.models.ReverseGeotagging import ReverseGeotagging
-from src.models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
+from models.AIGenPretrained import AIGenPretrained
+from models.AIGenPipeline import AIGenPipeline
+from models.ReverseGeotagging import ReverseGeotagging
+from models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
 
 
 async def main(root_dir: str):
@@ -19,7 +19,12 @@ async def main(root_dir: str):
     db_path=f"sqlite+aiosqlite:////{os.getcwd()}/prod_paligemma-3b-ft-cococap.db",
   )
   await strategy.init()
-  await strategy.generate_keyword_list_directory(directory_path=root_dir)
+  await strategy.generate_keyword_list_directory(
+    directory_path=root_dir,
+    extension_list=["nef"],
+    save_on_db=True,
+    save_on_file=False,
+  )
 
 
 if __name__ == "__main__":

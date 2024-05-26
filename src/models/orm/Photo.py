@@ -3,8 +3,8 @@ import uuid
 from datetime import datetime
 import pytz
 from sqlalchemy import Column, UUID, String, JSON, DateTime
-from src.models.orm.BaseOrm import BaseOrm
-from src.models.Base import Base
+from models.orm.BaseOrm import BaseOrm
+from models.Base import Base
 
 
 class Photo(BaseOrm):

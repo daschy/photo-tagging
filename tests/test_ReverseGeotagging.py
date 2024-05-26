@@ -1,6 +1,6 @@
 import os
 import pytest
-from src.models.ReverseGeotagging import ReverseGeotagging
+from models.ReverseGeotagging import ReverseGeotagging
 
 
 class TestReverseGeotagging:

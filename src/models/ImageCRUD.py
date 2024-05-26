@@ -1,7 +1,7 @@
 import os
 from typing import List
 import asyncio
-from src.models.Base import Base
+from models.Base import Base
 import json
 
 

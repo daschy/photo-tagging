@@ -8,7 +8,7 @@ from transformers import (
   PreTrainedModel,
   ProcessorMixin,
 )
-from src.models.AIGen import AIGen
+from models.AIGen import AIGen
 from PIL import Image
 
 

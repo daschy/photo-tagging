@@ -1,5 +1,5 @@
-from src.models.Base import Base
-from src.models.StrategyBase import StrategyBase
+from models.Base import Base
+from models.StrategyBase import StrategyBase
 
 
 class PhotoTaggingProcessor(Base):

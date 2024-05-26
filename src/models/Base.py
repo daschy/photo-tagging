@@ -1,7 +1,7 @@
 from abc import ABC
 from logging import Logger
 
-from src.utils.logger_utils import get_logger
+from utils.logger_utils import get_logger
 
 
 class Base(ABC):
