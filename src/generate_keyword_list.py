@@ -19,7 +19,7 @@ async def main(root_dir: str):
     db_path=f"sqlite+aiosqlite:////{os.getcwd()}/prod_paligemma-3b-ft-cococap.db",
   )
   await strategy.init()
-  await strategy.generate_keyword_list_directory(root_dir=root_dir)
+  await strategy.generate_keyword_list_directory(directory_path=root_dir)
 
 
 if __name__ == "__main__":

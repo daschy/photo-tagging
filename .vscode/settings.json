@@ -1,16 +1,13 @@
 {
-    "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true,
-    "python.linting.pylintArgs": [
-        "--rcfile",
-        "${workspaceFolder}/.pylintrc"
-    ],
-    "python.testing.pytestArgs": [
-        "."
-    ],
-    "python.testing.pytestEnabled": true,
-    "files.exclude": {
-        "**/*.pyc": true
-    },
-    "python.envFile": "${workspaceFolder}/.env"
+	"editor.detectIndentation": false,
+	"editor.tabSize": 2,
+	"editor.insertSpaces": false,
+	"python.testing.pytestEnabled": true,
+	"files.exclude": {
+		"**/*.pyc": true
+	},
+	"python.envFile": "${workspaceFolder}/.env",
+	"python.testing.unittestEnabled": false,
+	"python.analysis.typeCheckingMode": "standard",
+	"python.analysis.enablePytestSupport": true,
 }

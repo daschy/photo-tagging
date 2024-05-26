@@ -11,7 +11,8 @@ from src.models.AIGenPipeline import AIGenPipeline
 from src.models.AIGenPretrained import AIGenPretrained
 from src.models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
 from src.utils.db_utils_async import get_db_session
-from test_utils.test_utils import get_all_file_dir
+from tests.test_utils.test_utils import get_all_file_dir
+
 
 
 class TestStrategyGenerateKeywordList:
@@ -99,7 +100,7 @@ class TestStrategyGenerateKeywordList:
     self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
   ):
     save_output = await strategy.generate_keyword_list_directory(
-      root_dir=self.test_data_path, extension_list=self.test_extension_list
+      directory_path=self.test_data_path, extension_list=self.test_extension_list
     )
     assert save_output
     await self.validate_db_entries(
@@ -115,7 +116,7 @@ class TestStrategyGenerateKeywordList:
     self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
   ):
     save_output = await strategy.generate_keyword_list_directory(
-      root_dir=self.test_data_path,
+      directory_path=self.test_data_path,
       extension_list=self.test_extension_list,
       save_on_db=False,
       save_on_file=False,
@@ -133,7 +134,7 @@ class TestStrategyGenerateKeywordList:
     self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
   ):
     save_output = await strategy.generate_keyword_list_directory(
-      root_dir=self.test_data_path,
+      directory_path=self.test_data_path,
       extension_list=self.test_extension_list,
       save_on_db=True,
       save_on_file=True,
@@ -156,7 +157,7 @@ class TestStrategyGenerateKeywordList:
     self, strategy: StrategyGenerateKeywordList, file_path_list: List[str]
   ):
     save_output = await strategy.generate_keyword_list_directory(
-      root_dir=self.test_data_path,
+      directory_path=self.test_data_path,
       extension_list=self.test_extension_list,
       save_on_db=False,
       save_on_file=True,
