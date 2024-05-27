@@ -3,11 +3,24 @@ from geopy.geocoders import Nominatim
 from geopy.location import Location as GeopyLocation
 
 from models.Base import Base
-from models.ImageCRUD import ImageCRUD
-from models.Location import Location
+from models.ExifFileCRUD import ExifFileCRUD
+
+
+class Location(Base):
+	def __init__(self):
+		self.city = None
+		self.state = None
+		self.country = None
+		self.postal_code = None
+		self.road = None
 
 
 class ReverseGeotagging(Base):
+	def __init__(self):
+		super().__init__()
+		self.exif_crud = ExifFileCRUD()
+		self.geolocator = Nominatim(user_agent="reverse_geotagger")
+
 	def _dms_to_decimal(self, dms_string):
 		parts = dms_string.split(" ")
 		degrees = float(parts[0])
@@ -21,9 +34,10 @@ class ReverseGeotagging(Base):
 
 		return decimal_degrees
 
-	async def _get_gps_coordinates(self, image_path) -> tuple[float | None, float | None]:
-		image_crud = ImageCRUD()
-		latitude_str, longitude_str = await image_crud.read_gps_data(image_path)
+	async def _get_gps_coordinates(
+		self, file_path: str
+	) -> tuple[float | None, float | None]:
+		latitude_str, longitude_str = await self.exif_crud.read_gps_data(file_path)
 		latitude = longitude = None
 		if bool(latitude_str):
 			latitude = self._dms_to_decimal(latitude_str)
@@ -31,9 +45,8 @@ class ReverseGeotagging(Base):
 			longitude = self._dms_to_decimal(longitude_str)
 		return latitude, longitude
 
-	def _reverse_geotag(self, latitude, longitude) -> Location | None:
-		geolocator = Nominatim(user_agent="reverse_geotagger")
-		location: GeopyLocation = geolocator.reverse(
+	def _reverse_geotag(self, latitude: float, longitude: float) -> Location | None:
+		location: GeopyLocation = self.geolocator.reverse(
 			(latitude, longitude),
 			exactly_one=True,
 			language="en",  # type: ignore
@@ -53,8 +66,8 @@ class ReverseGeotagging(Base):
 		else:
 			return None
 
-	async def generate_reverse_geotag(self, image_path) -> List[str]:
-		lat, long = await self._get_gps_coordinates(image_path=image_path)
+	async def generate_reverse_geotag(self, file_path) -> List[str]:
+		lat, long = await self._get_gps_coordinates(file_path=file_path)
 		if lat is None or long is None:
 			output = []
 		else:
@@ -62,5 +75,4 @@ class ReverseGeotagging(Base):
 			output: List[str] = [
 				x for x in [address.country, address.city, address.road] if x is not None
 			]
-		# self.logger.debug(f"end {image_path}: {output}")
 		return output

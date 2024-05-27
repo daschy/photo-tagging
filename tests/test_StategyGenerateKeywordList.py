@@ -4,7 +4,7 @@ import pytest
 import pytest_asyncio
 from typing import List
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.ImageCRUD import ImageCRUD
+from models.ExifFileCRUD import ExifFileCRUD
 from models.orm.Photo import Photo
 from models.DBCRUD import DBCRUD
 from models.orm.BaseOrm import BaseOrm
@@ -60,9 +60,9 @@ class TestStrategyGenerateKeywordList:
 		output = get_all_file_dir(
 			directory_path=self.test_data_path, extension=self.test_extension_list[0]
 		)
-		image_crud = ImageCRUD()
+		exif_crud = ExifFileCRUD()
 		for image_path in output:
-			await image_crud.delete_all_keyword_list(file_path=image_path)
+			await exif_crud.delete_all_keyword_list(file_path=image_path)
 		yield output
 
 	@pytest.mark.asyncio
@@ -92,7 +92,7 @@ class TestStrategyGenerateKeywordList:
 			file_path=self.test_image_path, keyword_list=self.test_keyword_list
 		)
 		assert save_output
-		keyword_list_read_from_file = await strategy.image_crud.read_keyword_list(
+		keyword_list_read_from_file = await strategy.exif_crud.read_keyword_list(
 			self.test_image_path
 		)
 		assert len(self.test_keyword_list) == len(keyword_list_read_from_file)
@@ -111,7 +111,7 @@ class TestStrategyGenerateKeywordList:
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
 		test_db: AsyncSession,
-		image_crud: ImageCRUD,
+		exif_crud: ExifFileCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_data_path, extension_list=self.test_extension_list
@@ -120,7 +120,7 @@ class TestStrategyGenerateKeywordList:
 		saved_entries: List[Photo] = await self.retrieve_test_db_entries(db=test_db)
 		assert len(saved_entries) == len(file_path_list)
 		for image_path in file_path_list:
-			file_keyword_list = await image_crud.read_keyword_list(file_path=image_path)
+			file_keyword_list = await exif_crud.read_keyword_list(file_path=image_path)
 			assert len(file_keyword_list) == 0
 
 	@pytest.mark.asyncio
@@ -129,7 +129,7 @@ class TestStrategyGenerateKeywordList:
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
 		test_db: AsyncSession,
-		image_crud: ImageCRUD,
+		exif_crud: ExifFileCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_data_path,
@@ -142,7 +142,7 @@ class TestStrategyGenerateKeywordList:
 		saved_entries = await self.retrieve_test_db_entries(db=test_db)
 		assert len(saved_entries) == 0
 		for image_path in file_path_list:
-			file_keyword_list = await image_crud.read_keyword_list(file_path=image_path)
+			file_keyword_list = await exif_crud.read_keyword_list(file_path=image_path)
 			assert len(file_keyword_list) == 0
 
 	@pytest.mark.asyncio
@@ -151,7 +151,7 @@ class TestStrategyGenerateKeywordList:
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
 		test_db: AsyncSession,
-		image_crud: ImageCRUD,
+		exif_crud: ExifFileCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_data_path,
@@ -164,7 +164,7 @@ class TestStrategyGenerateKeywordList:
 		saved_entries = await self.retrieve_test_db_entries(db=test_db)
 		assert len(saved_entries) == len(file_path_list)
 		for file_path in file_path_list:
-			file_keyword_list = await image_crud.read_keyword_list(file_path=file_path)
+			file_keyword_list = await exif_crud.read_keyword_list(file_path=file_path)
 			photo_entry = next(x for x in saved_entries if x.path == file_path)
 			assert len(file_keyword_list) == len(photo_entry.keyword_list)
 			assert file_keyword_list == photo_entry.keyword_list
@@ -175,7 +175,7 @@ class TestStrategyGenerateKeywordList:
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
 		test_db: AsyncSession,
-		image_crud: ImageCRUD,
+		exif_crud: ExifFileCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_data_path,
@@ -188,5 +188,5 @@ class TestStrategyGenerateKeywordList:
 		saved_entries: List[Photo] = await self.retrieve_test_db_entries(db=test_db)
 		assert len(saved_entries) == 0
 		for image_path in file_path_list:
-			file_keyword_list = await image_crud.read_keyword_list(file_path=image_path)
+			file_keyword_list = await exif_crud.read_keyword_list(file_path=image_path)
 			assert len(file_keyword_list) > 0

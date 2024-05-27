@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
 from models.orm.Photo import Photo
 from models.AIGenPretrained import AIGenPretrained
 from models.AIGenPipeline import TOKEN_TYPE, AIGenPipeline
-from models.ImageCRUD import ImageCRUD
+from models.ExifFileCRUD import ExifFileCRUD
 from models.DBCRUD import DBCRUD
 
 from models.ReverseGeotagging import ReverseGeotagging
@@ -29,7 +29,7 @@ class StrategyGenerateKeywordList(StrategyBase):
 		self.token_classification_ai: AIGenPipeline = token_classification_ai
 		self.token_classification_ai.ai_init()
 		self.reverse_geotagging: ReverseGeotagging = reverse_geotagging
-		self.image_crud = ImageCRUD()
+		self.exif_crud = ExifFileCRUD()
 
 	def _check_init(self):
 		if self.image_to_text_ai.is_init() is False:
@@ -60,7 +60,7 @@ class StrategyGenerateKeywordList(StrategyBase):
 					self.token_classification_ai.generate_token_list(
 						text=text, token_type=TOKEN_TYPE.NOUN
 					),
-					self.reverse_geotagging.generate_reverse_geotag(image_path=image_path),
+					self.reverse_geotagging.generate_reverse_geotag(file_path=image_path),
 					self.token_classification_ai.generate_token_list(
 						text=text, token_type=TOKEN_TYPE.ADJ
 					),
@@ -79,7 +79,7 @@ class StrategyGenerateKeywordList(StrategyBase):
 			raise
 
 	async def save_to_file(self, file_path: str, keyword_list: List[str]) -> bool:
-		output = await self.image_crud.save_keyword_list(
+		output = await self.exif_crud.save_keyword_list(
 			file_path=file_path, keyword_list=keyword_list
 		)
 		return output
