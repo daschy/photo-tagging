@@ -1,3 +1,4 @@
+from asyncio.subprocess import Process
 import os
 from typing import List
 import asyncio
@@ -63,16 +64,9 @@ class ExifFileCRUD(Base):
 		longitude_ref = exif_data[0].get(_EXIF_TAG_GPS_LONGITUDE, "")
 		return latitude_ref, longitude_ref
 
-	async def read_data_json(self, file_path) -> object:
-		exif_data = await self._execute_exiftool(
-			["-json"],
-			file_path,
-		)
-		return exif_data
-
 	async def _execute_exiftool(self, args: List[str], file_path: str) -> dict:
 		try:
-			process = await asyncio.create_subprocess_exec(
+			process: Process = await asyncio.create_subprocess_exec(
 				"exiftool",
 				*args,
 				file_path,
@@ -80,18 +74,17 @@ class ExifFileCRUD(Base):
 				stderr=asyncio.subprocess.PIPE,
 			)
 			stdout, stderr = await process.communicate()
-
 			if process.returncode != 0:
 				raise ChildProcessError(f"ExifTool error: {stderr.decode().strip()}")
-
 			backup_file = f"{file_path}_original"
 			if os.path.exists(backup_file):
 				os.remove(backup_file)
 
-			if stdout.decode() == "" or stdout.decode() is None:
+			if not bool(stdout.decode()):
 				return {}
-			# Parse the JSON output
 			return json.loads(stdout.decode())
 
+		except json.JSONDecodeError as e:
+			raise e
 		except ChildProcessError as e:
 			raise e

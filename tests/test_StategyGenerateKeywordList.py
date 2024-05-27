@@ -29,12 +29,14 @@ class TestStrategyGenerateKeywordList:
 		"white",
 		"windmill",
 	]
-	test_data_path: str = os.path.join(os.getcwd(), "tests", "test_data")
+	test_directory_with_photos_path: str = os.path.join(os.getcwd(), "tests", "test_data")
 	test_extension_list = ["nef"]
 
 	@pytest_asyncio.fixture(scope="function")
 	async def test_db(self, strategy: StrategyGenerateKeywordList):
-		test_db_path: str = os.path.join(self.test_data_path, strategy.get_db_name())
+		test_db_path: str = os.path.join(
+			self.test_directory_with_photos_path, strategy.get_db_name()
+		)
 		test_db_conn_str: str = f"sqlite+aiosqlite:////{test_db_path}"
 		engine = await init_engine(test_db_conn_str)
 		sessionmaker = get_db_session(engine=engine)
@@ -43,24 +45,17 @@ class TestStrategyGenerateKeywordList:
 		async with engine.begin() as conn:
 			await conn.run_sync(BaseOrm.metadata.drop_all)
 
-	# @pytest_asyncio.fixture(scope="class")
-	# async def strategy(self):
-	# 	output = StrategyGenerateKeywordList(
-	# 		image_to_text_ai=AIGenPretrained(model_id="google/paligemma-3b-ft-cococap-448"),
-	# 		token_classification_ai=AIGenPipeline(
-	# 			model_id="vblagoje/bert-english-uncased-finetuned-pos"
-	# 		),
-	# 		reverse_geotagging=ReverseGeotagging(),
-	# 	)
-	# 	# await output.init()
-	# 	yield output
+	@pytest.fixture(scope="class")
+	def exif_crud(self):
+		exif_crud = ExifFileCRUD()
+		yield exif_crud
 
 	@pytest_asyncio.fixture(scope="function")
-	async def file_path_list(self):
+	async def file_path_list(self, exif_crud: ExifFileCRUD):
 		output = get_all_file_dir(
-			directory_path=self.test_data_path, extension=self.test_extension_list[0]
+			directory_path=self.test_directory_with_photos_path,
+			extension=self.test_extension_list[0],
 		)
-		exif_crud = ExifFileCRUD()
 		for image_path in output:
 			await exif_crud.delete_all_keyword_list(file_path=image_path)
 		yield output
@@ -114,7 +109,8 @@ class TestStrategyGenerateKeywordList:
 		exif_crud: ExifFileCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
-			directory_path=self.test_data_path, extension_list=self.test_extension_list
+			directory_path=self.test_directory_with_photos_path,
+			extension_list=self.test_extension_list,
 		)
 		assert save_output
 		saved_entries: List[Photo] = await self.retrieve_test_db_entries(db=test_db)
@@ -132,7 +128,7 @@ class TestStrategyGenerateKeywordList:
 		exif_crud: ExifFileCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
-			directory_path=self.test_data_path,
+			directory_path=self.test_directory_with_photos_path,
 			extension_list=self.test_extension_list,
 			save_on_db=False,
 			save_on_file=False,
@@ -154,7 +150,7 @@ class TestStrategyGenerateKeywordList:
 		exif_crud: ExifFileCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
-			directory_path=self.test_data_path,
+			directory_path=self.test_directory_with_photos_path,
 			extension_list=self.test_extension_list,
 			save_on_db=True,
 			save_on_file=True,
@@ -178,7 +174,7 @@ class TestStrategyGenerateKeywordList:
 		exif_crud: ExifFileCRUD,
 	):
 		save_output = await strategy.generate_keyword_list_directory(
-			directory_path=self.test_data_path,
+			directory_path=self.test_directory_with_photos_path,
 			extension_list=self.test_extension_list,
 			save_on_db=False,
 			save_on_file=True,
