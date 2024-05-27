@@ -2,14 +2,14 @@ import pytest
 
 from models.AIGenPipeline import AIGenPipeline
 from models.AIGenPretrained import AIGenPretrained
-from models.ImageCRUD import ImageCRUD
+from models.ExifFileCRUD import ExifFileCRUD
 from models.ReverseGeotagging import ReverseGeotagging
 from models.StrategyGenerateKeywordList import StrategyGenerateKeywordList
 
 
 @pytest.fixture(scope="module")
-def image_crud():
-	output = ImageCRUD()
+def exif_crud():
+	output = ExifFileCRUD()
 	yield output
 
 @pytest.fixture(scope="module", autouse=True)

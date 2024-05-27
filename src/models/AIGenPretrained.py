@@ -8,11 +8,15 @@ from transformers import (
 	PreTrainedModel,
 	ProcessorMixin,
 )
-from models.AIGen import AIGen
+from models.AIGen import AIGen, AIGenParams
 from PIL import Image
 
 
-class AIGenPretrained(AIGen):
+class AIGenParamsPaliGemma(AIGenParams):
+	img_path: str
+
+
+class AIGenPretrained(AIGen[AIGenParamsPaliGemma]):
 	def __init__(self, model_id: str):
 		super().__init__(model_id=model_id)
 
@@ -33,19 +37,28 @@ class AIGenPretrained(AIGen):
 		self.processor = PaliGemmaProcessor.from_pretrained(self.model_id)
 		self.logger.debug("end create model")
 
-	async def generate_text(self, img_path: str, prompt: str) -> str:
-		with Image.open(img_path) as image:
+	async def generate(
+		self,
+		**kwargs: AIGenParamsPaliGemma,
+	) -> str:
+		return await self._generate_text(
+			file_path=kwargs.get("file_path"),  # type: ignore
+			text=kwargs.get("text"),  # type: ignore
+		)
+
+	async def _generate_text(self, file_path: str, text: str) -> str:
+		with Image.open(file_path) as image:
 			loop = asyncio.get_running_loop()
 			with ThreadPoolExecutor() as pool:
-				if prompt is not None and len(prompt) > 0:
-					processor: PaliGemmaProcessor = self.processor
-					model_inputs = processor(images=image, text=prompt, return_tensors="pt").to(
+				if text is not None and len(text) > 0:
+					processor: PaliGemmaProcessor = self.processor # type: ignore
+					model_inputs = processor(images=image, text=text, return_tensors="pt").to(
 						self.device
 					)
 					input_len = model_inputs["input_ids"].shape[-1]
 					generation = await loop.run_in_executor(
 						pool,
-						lambda: self.model.generate(
+						lambda: self.model.generate( # type: ignore
 							**model_inputs,
 							max_new_tokens=50,
 							do_sample=False,

@@ -1,4 +1,5 @@
-from typing import List
+from typing import List, Generic
+from typing_extensions import Unpack
 import asyncio
 from enum import Enum
 from concurrent.futures import ThreadPoolExecutor
@@ -8,7 +9,7 @@ from transformers import (
 	PreTrainedModel,
 	AutoTokenizer,
 )
-from models.AIGen import AIGen
+from models.AIGen import AIGen, AIGenParams
 
 
 class TOKEN_TYPE(Enum):
@@ -16,7 +17,11 @@ class TOKEN_TYPE(Enum):
 	ADJ = "ADJ"
 
 
-class AIGenPipeline(AIGen):
+class AIGenParamsBert(AIGenParams):
+	token_type: TOKEN_TYPE
+
+
+class AIGenPipeline(AIGen[AIGenParamsBert]):
 	def __init__(self, model_id: str, aggregation_strategy: str = "simple"):
 		super().__init__(model_id=model_id)
 		self.aggregation_strategy = aggregation_strategy
@@ -39,7 +44,18 @@ class AIGenPipeline(AIGen):
 		self.processor = self.pipeline.tokenizer
 		return self.model, self.processor  # type: ignore
 
-	async def generate_token_list(self, text: str, token_type: TOKEN_TYPE) -> List[str]:
+	async def generate(
+		self,
+		**kwargs: AIGenParamsBert,
+	) -> List[str]:
+		return await self._generate_token_list(
+			text=kwargs.get("text"),  # type: ignore
+			token_type=kwargs.get(
+				"token_type",
+			),  # type: ignore
+		)
+
+	async def _generate_token_list(self, text: str, token_type: TOKEN_TYPE) -> List[str]:
 		if text is None or len(text) == 0:
 			raise ValueError("text is null or empty")
 		if token_type is None:

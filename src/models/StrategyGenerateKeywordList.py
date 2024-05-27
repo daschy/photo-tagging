@@ -5,10 +5,11 @@ from typing import List
 import itertools
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
 
+from models.AIGen import AIGen
+from models.AIGenPretrained import AIGenParamsPaliGemma
 from models.orm.Photo import Photo
-from models.AIGenPretrained import AIGenPretrained
-from models.AIGenPipeline import TOKEN_TYPE, AIGenPipeline
-from models.ImageCRUD import ImageCRUD
+from models.AIGenPipeline import TOKEN_TYPE, AIGenParamsBert
+from models.ExifFileCRUD import ExifFileCRUD
 from models.DBCRUD import DBCRUD
 
 from models.ReverseGeotagging import ReverseGeotagging
@@ -19,17 +20,17 @@ from utils.db_utils_async import get_db_session, init_engine
 class StrategyGenerateKeywordList(StrategyBase):
 	def __init__(
 		self,
-		image_to_text_ai: AIGenPretrained,
-		token_classification_ai: AIGenPipeline,
+		image_to_text_ai: AIGen[AIGenParamsPaliGemma],
+		token_classification_ai: AIGen[AIGenParamsBert],
 		reverse_geotagging: ReverseGeotagging,
 	):
 		super().__init__()
-		self.image_to_text_ai: AIGenPretrained = image_to_text_ai
+		self.image_to_text_ai: AIGen[AIGenParamsPaliGemma] = image_to_text_ai
 		self.image_to_text_ai.ai_init()
-		self.token_classification_ai: AIGenPipeline = token_classification_ai
+		self.token_classification_ai: AIGen[AIGenParamsBert] = token_classification_ai
 		self.token_classification_ai.ai_init()
 		self.reverse_geotagging: ReverseGeotagging = reverse_geotagging
-		self.image_crud = ImageCRUD()
+		self.exif_crud = ExifFileCRUD()
 
 	def _check_init(self):
 		if self.image_to_text_ai.is_init() is False:
@@ -47,21 +48,21 @@ class StrategyGenerateKeywordList(StrategyBase):
 			self._check_init()
 			caption_color_list: List[str] = list(
 				await asyncio.gather(
-					self.image_to_text_ai.generate_text(img_path=image_path, prompt="caption"),
-					self.image_to_text_ai.generate_text(
-						img_path=image_path,
-						prompt="what are the four most dominant colors in the picture?",
+					self.image_to_text_ai.generate(file_path=image_path, text="caption"),
+					self.image_to_text_ai.generate(
+						file_path=image_path,
+						text="what are the four most dominant colors in the picture?",
 					),
 				)
-			)
+			)  # type: ignore
 			text = " ".join(caption_color_list)
 			token_list: List[List[str]] = list(
 				await asyncio.gather(
-					self.token_classification_ai.generate_token_list(
+					self.token_classification_ai.generate(  # type: ignore
 						text=text, token_type=TOKEN_TYPE.NOUN
 					),
-					self.reverse_geotagging.generate_reverse_geotag(image_path=image_path),
-					self.token_classification_ai.generate_token_list(
+					self.reverse_geotagging.generate_reverse_geotag(file_path=image_path),
+					self.token_classification_ai.generate(  # type: ignore
 						text=text, token_type=TOKEN_TYPE.ADJ
 					),
 				)
@@ -79,8 +80,8 @@ class StrategyGenerateKeywordList(StrategyBase):
 			raise
 
 	async def save_to_file(self, file_path: str, keyword_list: List[str]) -> bool:
-		output = await self.image_crud.save_keyword_list(
-			file_path, keyword_list=keyword_list
+		output = await self.exif_crud.save_keyword_list(
+			file_path=file_path, keyword_list=keyword_list
 		)
 		return output
 

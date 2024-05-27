@@ -1,73 +1,78 @@
-import exifread
 from typing import List
 from geopy.geocoders import Nominatim
+from geopy.location import Location as GeopyLocation
 
 from models.Base import Base
-from models.Location import Location
+from models.ExifFileCRUD import ExifFileCRUD
+
+
+class Location(Base):
+	def __init__(self):
+		self.city = None
+		self.state = None
+		self.country = None
+		self.postal_code = None
+		self.road = None
 
 
 class ReverseGeotagging(Base):
-  def _get_gps_coordinates(self, image_path):
-    with open(image_path, "rb") as f:
-      tags = exifread.process_file(f)
-      if "GPS GPSLatitude" in tags and "GPS GPSLongitude" in tags:
-        latitude_ref = tags["GPS GPSLatitudeRef"].values
-        longitude_ref = tags["GPS GPSLongitudeRef"].values
-        latitude_values = tags["GPS GPSLatitude"].values
-        longitude_values = tags["GPS GPSLongitude"].values
+	def __init__(self):
+		super().__init__()
+		self.exif_crud = ExifFileCRUD()
+		self.geolocator = Nominatim(user_agent="reverse_geotagger")
 
-        # Convert GPS coordinates to decimal format
-        latitude = float(latitude_values[0].num) / float(latitude_values[0].den)
-        latitude += float(latitude_values[1].num) / (float(latitude_values[1].den) * 60)
-        latitude += float(latitude_values[2].num) / (
-          float(latitude_values[2].den) * 3600
-        )
-        if latitude_ref == "S":
-          latitude = -latitude
+	def _dms_to_decimal(self, dms_string):
+		parts = dms_string.split(" ")
+		degrees = float(parts[0])
+		minutes = float(parts[2][:-1])
+		seconds = float(parts[3][:-1])
+		direction = parts[4]
 
-        longitude = float(longitude_values[0].num) / float(longitude_values[0].den)
-        longitude += float(longitude_values[1].num) / (
-          float(longitude_values[1].den) * 60
-        )
-        longitude += float(longitude_values[2].num) / (
-          float(longitude_values[2].den) * 3600
-        )
-        if longitude_ref == "W":
-          longitude = -longitude
+		decimal_degrees = degrees + (minutes / 60) + (seconds / 3600)
+		if direction in ["S", "W"]:
+			decimal_degrees *= -1
 
-        return latitude, longitude
-      else:
-        return None, None
+		return decimal_degrees
 
-  def _reverse_geotag(self, latitude, longitude):
-    geolocator = Nominatim(user_agent="reverse_geotagger")
-    location = geolocator.reverse(
-      (latitude, longitude), exactly_one=True, language="en"
-    )
+	async def _get_gps_coordinates(
+		self, file_path: str
+	) -> tuple[float | None, float | None]:
+		latitude_str, longitude_str = await self.exif_crud.read_gps_data(file_path)
+		latitude = longitude = None
+		if bool(latitude_str):
+			latitude = self._dms_to_decimal(latitude_str)
+		if bool(longitude_str):
+			longitude = self._dms_to_decimal(longitude_str)
+		return latitude, longitude
 
-    if location:
-      address_components = location.raw.get("address", {})
+	def _reverse_geotag(self, latitude: float, longitude: float) -> Location | None:
+		location: GeopyLocation = self.geolocator.reverse(
+			(latitude, longitude),
+			exactly_one=True,
+			language="en",  # type: ignore
+		)  # type: ignore
 
-      result = Location()
-      result.road = address_components.get("road", None)
-      result.city = address_components.get("city", None)
-      result.state = address_components.get("state", None)
-      result.country = address_components.get("country", None)
-      result.postal_code = address_components.get("postcode", None)
+		if location:
+			address_components = location.raw.get("address", {})
 
-      return result
-    else:
-      return None
+			result = Location()
+			result.road = address_components.get("road", None)
+			result.city = address_components.get("city", None)
+			result.state = address_components.get("state", None)
+			result.country = address_components.get("country", None)
+			result.postal_code = address_components.get("postcode", None)
 
-  async def generate_reverse_geotag(self, image_path) -> List[str]:
-    lat, long = self._get_gps_coordinates(image_path=image_path)
-    # self.logger.debug(f"start {image_path}: lat={lat},long={long}")
-    if lat is None or long is None:
-      output = []
-    else:
-      address = self._reverse_geotag(lat, long)
-      output = [
-        x for x in [address.country, address.city, address.road] if x is not None
-      ]
-    # self.logger.debug(f"end {image_path}: {output}")
-    return output
+			return result
+		else:
+			return None
+
+	async def generate_reverse_geotag(self, file_path) -> List[str]:
+		lat, long = await self._get_gps_coordinates(file_path=file_path)
+		if lat is None or long is None:
+			output = []
+		else:
+			address: Location = self._reverse_geotag(lat, long)  # type: ignore
+			output: List[str] = [
+				x for x in [address.country, address.city, address.road] if x is not None
+			]
+		return output
