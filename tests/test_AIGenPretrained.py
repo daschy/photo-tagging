@@ -1,6 +1,6 @@
 import os
 import pytest
-from src.models.AIGenPretrained import AIGenPretrained
+from models.AIGenPretrained import AIGenPretrained
 
 
 class TestAIGenPretrained:
