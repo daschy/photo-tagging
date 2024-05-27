@@ -80,7 +80,7 @@ class StrategyGenerateKeywordList(StrategyBase):
 
 	async def save_to_file(self, file_path: str, keyword_list: List[str]) -> bool:
 		output = await self.image_crud.save_keyword_list(
-			file_path, keyword_list=keyword_list
+			file_path=file_path, keyword_list=keyword_list
 		)
 		return output
 

@@ -5,70 +5,86 @@ from models.Base import Base
 import json
 
 
-EXIF_TAG_KEYWORDS: str = "Keywords"
-EXIF_TAG_IMAGEDESCRIPTION: str = "ImageDescription"
+_EXIF_TAG_KEYWORDS = "Keywords"
+_EXIF_TAG_GPS_LATITUDE_REF = "GPSLatitude"
+_EXIF_TAG_GPS_LONGITUDE_REF = "GPSLongitude"
 
 
 class ImageCRUD(Base):
 	async def save_keyword_list(
-		self, file_path, keyword_list: List[str], do_not_overwrite: bool = False
+		self, file_path, keyword_list: List[str], overwrite: bool = False
 	) -> bool:
-		if not do_not_overwrite:
+		if not overwrite:
 			await self.delete_all_keyword_list(file_path=file_path)
-		process = await asyncio.create_subprocess_exec(
-			"exiftool",
-			*([f"-{EXIF_TAG_KEYWORDS}+={keyword}" for keyword in keyword_list]),
+		await self._execute_exiftool(
+			(
+				["-" + _EXIF_TAG_KEYWORDS + "+=" + keyword for keyword in keyword_list]
+				+ ["-json"]
+			),
 			file_path,
-			stdout=asyncio.subprocess.PIPE,
-			stderr=asyncio.subprocess.PIPE,
 		)
-		_, stderr = await process.communicate()
-
-		if process.returncode != 0:
-			raise ChildProcessError(f"ExifTool error: {stderr.decode().strip()}")
-
-		# ExifTool creates a backup file with _original suffix, so remove it
-		backup_file = f"{file_path}_original"
-		if os.path.exists(backup_file):
-			os.remove(backup_file)
 		return True
 
 	async def delete_all_keyword_list(self, file_path) -> bool:
-		existing_keyword_list = await self.read_keyword_list(file_path=file_path)
-		process = await asyncio.create_subprocess_exec(
-			"exiftool",
-			*([f"-{EXIF_TAG_KEYWORDS}-={keyword}" for keyword in existing_keyword_list]),
+		existing_keywords = await self.read_keyword_list(file_path=file_path)
+		args = [
+			"-" + _EXIF_TAG_KEYWORDS + "-=" + keyword for keyword in existing_keywords
+		] + ["-json"]
+		await self._execute_exiftool(
+			args,
 			file_path,
-			stdout=asyncio.subprocess.PIPE,
-			stderr=asyncio.subprocess.PIPE,
 		)
-		_, stderr = await process.communicate()
-
-		if process.returncode != 0:
-			raise ChildProcessError(f"ExifTool error: {stderr.decode().strip()}")
-
-		# ExifTool creates a backup file with _original suffix, so remove it
-		backup_file = f"{file_path}_original"
-		if os.path.exists(backup_file):
-			os.remove(backup_file)
 		return True
 
 	async def read_keyword_list(self, file_path) -> List[str]:
-		process = await asyncio.create_subprocess_exec(
-			"exiftool",
-			f"-{EXIF_TAG_KEYWORDS}",
-			"-json",
-			file_path,
-			stdout=asyncio.subprocess.PIPE,
-			stderr=asyncio.subprocess.PIPE,
+		exif_data = await self._execute_exiftool(
+			["-" + _EXIF_TAG_KEYWORDS, "-json"], file_path
 		)
-		stdout, stderr = await process.communicate()
-		if process.returncode != 0:
-			raise ChildProcessError(f"ExifTool error: {stderr.decode().strip()}")
-		# Parse the JSON output
-		exif_data = json.loads(stdout.decode())
+		return exif_data[0].get(_EXIF_TAG_KEYWORDS, [])
 
-		# Extract keywords from the EXIF data
-		keyword_list = exif_data[0].get(EXIF_TAG_KEYWORDS, [])
-		output: List[str] = keyword_list
-		return output
+	async def save_gps_data(
+		self, file_path, latitude_ref: str, longitude_ref: str
+	) -> bool:
+		await self._execute_exiftool(
+			[
+				f"-{_EXIF_TAG_GPS_LATITUDE_REF}={latitude_ref}",
+				f"-{_EXIF_TAG_GPS_LONGITUDE_REF}={longitude_ref}",
+			],
+			file_path,
+		)
+		return True
+
+	async def read_gps_data(self, file_path) -> tuple:
+		exif_data = await self._execute_exiftool(
+			[f"-{_EXIF_TAG_GPS_LATITUDE_REF}", f"-{_EXIF_TAG_GPS_LONGITUDE_REF}", "-json"],
+			file_path,
+		)
+		latitude_ref = exif_data[0].get(_EXIF_TAG_GPS_LATITUDE_REF, "")
+		longitude_ref = exif_data[0].get(_EXIF_TAG_GPS_LONGITUDE_REF, "")
+		return latitude_ref, longitude_ref
+
+	async def _execute_exiftool(self, args: List[str], file_path: str) -> dict:
+		try:
+			process = await asyncio.create_subprocess_exec(
+				"exiftool",
+				*args,
+				file_path,
+				stdout=asyncio.subprocess.PIPE,
+				stderr=asyncio.subprocess.PIPE,
+			)
+			stdout, stderr = await process.communicate()
+
+			if process.returncode != 0:
+				raise ChildProcessError(f"ExifTool error: {stderr.decode().strip()}")
+
+			backup_file = f"{file_path}_original"
+			if os.path.exists(backup_file):
+				os.remove(backup_file)
+
+			if stdout.decode() == "" or stdout.decode() is None:
+				return {}
+			# Parse the JSON output
+			return json.loads(stdout.decode())
+
+		except ChildProcessError as e:
+			raise e
