@@ -3,25 +3,11 @@
 	"configurations": [
 		{
 			"name": "Python: Current File",
-			"type": "python",
+			"type": "debugpy",
 			"request": "launch",
 			"program": "${file}",
 			"cwd": "${fileDirname}",
 			"console": "integratedTerminal",
-		},
-		{
-			"name": "Python: Debug Tests",
-			"type": "debugpy",
-			"request": "launch",
-			"program": "${file}",
-			"purpose": [
-				"debug-test"
-			],
-			"console": "integratedTerminal",
-			"env": {
-				"PYTEST_ADDOPTS": "--no-cov"
-			},
-			"justMyCode": false
 		}
 	]
 }
