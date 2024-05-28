@@ -13,52 +13,53 @@ _EXIF_TAG_GPS_LONGITUDE = "GPSLongitude"
 
 class ExifFileCRUD(Base):
 	async def save_keyword_list(
-		self, file_path, keyword_list: List[str], overwrite: bool = False
+		self, file_path, keyword_list: List[str], overwrite_existing: bool = True
 	) -> bool:
-		if not overwrite:
-			await self.delete_all_keyword_list(file_path=file_path)
+		if overwrite_existing:
+			kw_operator = "="
+		else:
+			kw_operator = "+="
 		await self._execute_exiftool(
 			(
-				["-" + _EXIF_TAG_KEYWORDS + "+=" + keyword for keyword in keyword_list]
+				[f"-{_EXIF_TAG_KEYWORDS}{kw_operator}{keyword}" for keyword in keyword_list]
 				+ ["-json"]
 			),
 			file_path,
 		)
 		return True
 
-	async def delete_all_keyword_list(self, file_path) -> bool:
+	async def delete_all_keyword_list(self, file_path: str) -> bool:
 		existing_keywords = await self.read_keyword_list(file_path=file_path)
-		args = [
-			"-" + _EXIF_TAG_KEYWORDS + "-=" + keyword for keyword in existing_keywords
-		] + ["-json"]
 		await self._execute_exiftool(
-			args,
-			file_path,
+			args=(
+				[f"-{_EXIF_TAG_KEYWORDS}-={keyword}" for keyword in existing_keywords]
+				+ ["-json"]
+			),
+			file_path=file_path,
 		)
 		return True
 
 	async def read_keyword_list(self, file_path) -> List[str]:
 		exif_data = await self._execute_exiftool(
-			["-" + _EXIF_TAG_KEYWORDS, "-json"], file_path
+			args=[f"-{_EXIF_TAG_KEYWORDS}", "-json"],
+			file_path=file_path,
 		)
 		return exif_data[0].get(_EXIF_TAG_KEYWORDS, [])
 
-	async def save_gps_data(
-		self, file_path, latitude_ref: str, longitude_ref: str
-	) -> bool:
+	async def save_gps_data(self, file_path: str, lat: str, lon: str) -> bool:
 		await self._execute_exiftool(
-			[
-				f"-{_EXIF_TAG_GPS_LATITUDE}={latitude_ref}",
-				f"-{_EXIF_TAG_GPS_LONGITUDE}={longitude_ref}",
+			args=[
+				f"-{_EXIF_TAG_GPS_LATITUDE}={lat}",
+				f"-{_EXIF_TAG_GPS_LONGITUDE}={lon}",
 			],
-			file_path,
+			file_path=file_path,
 		)
 		return True
 
-	async def read_gps_data(self, file_path) -> tuple:
+	async def read_gps_data(self, file_path: str) -> tuple:
 		exif_data = await self._execute_exiftool(
-			[f"-{_EXIF_TAG_GPS_LATITUDE}", f"-{_EXIF_TAG_GPS_LONGITUDE}", "-json"],
-			file_path,
+			args=[f"-{_EXIF_TAG_GPS_LATITUDE}", f"-{_EXIF_TAG_GPS_LONGITUDE}", "-json"],
+			file_path=file_path,
 		)
 		latitude_ref = exif_data[0].get(_EXIF_TAG_GPS_LATITUDE, "")
 		longitude_ref = exif_data[0].get(_EXIF_TAG_GPS_LONGITUDE, "")
