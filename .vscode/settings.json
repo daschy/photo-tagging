@@ -10,12 +10,4 @@
 	"python.testing.unittestEnabled": false,
 	"python.analysis.typeCheckingMode": "standard",
 	"python.analysis.enablePytestSupport": true,
-	"python.testing.pytestArgs": [
-		"-v",
-		"--cov=src/",
-		"--cov-report=lcov:tests/coverage/coverage.lcov",
-		"--pdb",
-		"--cov-branch",
-		"tests/"
-	]
 }

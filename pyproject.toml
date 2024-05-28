@@ -56,5 +56,9 @@ pythonpath = [
 ]
 addopts = [
 		"-ra",
-		"--verbose"
+		"--cov=.",
+		"--cov-report=xml:tests/coverage/coverage.xml",
+		"--pdb",
+		"--cov-branch",
+		"tests/"
 ]
