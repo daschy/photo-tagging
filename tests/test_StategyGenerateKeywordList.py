@@ -20,6 +20,7 @@ class TestStrategyGenerateKeywordList:
 		os.getcwd(), "tests", "test_data", "windmill_address_some_none.NEF"
 	)
 	test_keyword_list = [
+		"Aalsmeer",
 		"background",
 		"black",
 		"blue",
