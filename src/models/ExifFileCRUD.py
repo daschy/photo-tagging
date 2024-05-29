@@ -12,29 +12,30 @@ _EXIF_TAG_GPS_LONGITUDE = "GPSLongitude"
 
 
 class ExifFileCRUD(Base):
-	async def save_keyword_list(
-		self, file_path, keyword_list: List[str], overwrite_existing: bool = True
-	) -> bool:
-		if overwrite_existing:
-			kw_operator = "="
-		else:
-			kw_operator = "+="
+	async def save_keyword_list(self, file_path, keyword_list: List[str]) -> bool:
 		await self._execute_exiftool(
-			(
-				[f"-{_EXIF_TAG_KEYWORDS}{kw_operator}{keyword}" for keyword in keyword_list]
-				+ ["-json"]
-			),
+			([f"-{_EXIF_TAG_KEYWORDS}={keyword}" for keyword in keyword_list] + ["-json"]),
 			file_path,
 		)
 		return True
 
-	async def delete_all_keyword_list(self, file_path: str) -> bool:
-		existing_keywords = await self.read_keyword_list(file_path=file_path)
+	async def add_keyword_list(self, file_path, keyword_list: List[str]) -> bool:
 		await self._execute_exiftool(
-			args=(
-				[f"-{_EXIF_TAG_KEYWORDS}-={keyword}" for keyword in existing_keywords]
-				+ ["-json"]
-			),
+			([f"-{_EXIF_TAG_KEYWORDS}+={keyword}" for keyword in keyword_list] + ["-json"]),
+			file_path,
+		)
+		return True
+
+	async def delete_keyword_list(self, file_path: str) -> bool:
+		await self._execute_exiftool(
+			args=[f"-{_EXIF_TAG_KEYWORDS}=", "-json"],
+			file_path=file_path,
+		)
+		return True
+
+	async def delete_gps_data(self, file_path: str) -> bool:
+		await self._execute_exiftool(
+			args=[f"-{_EXIF_TAG_GPS_LATITUDE}=", f"-{_EXIF_TAG_GPS_LONGITUDE}=", "-json"],
 			file_path=file_path,
 		)
 		return True
@@ -46,11 +47,12 @@ class ExifFileCRUD(Base):
 		)
 		return exif_data[0].get(_EXIF_TAG_KEYWORDS, [])
 
-	async def save_gps_data(self, file_path: str, lat: str, lon: str) -> bool:
+	async def save_gps_data(self, file_path: str, dms_lat: str, dms_lon: str) -> bool:
 		await self._execute_exiftool(
 			args=[
-				f"-{_EXIF_TAG_GPS_LATITUDE}={lat}",
-				f"-{_EXIF_TAG_GPS_LONGITUDE}={lon}",
+				f"-{_EXIF_TAG_GPS_LATITUDE}={dms_lat}",
+				f"-{_EXIF_TAG_GPS_LONGITUDE}={dms_lon}",
+				"-json",
 			],
 			file_path=file_path,
 		)
