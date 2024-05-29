@@ -20,6 +20,7 @@ class TestStrategyGenerateKeywordList:
 		os.getcwd(), "tests", "test_data", "windmill_address_some_none.NEF"
 	)
 	test_keyword_list = [
+		"Aalsmeer",
 		"background",
 		"black",
 		"blue",
@@ -57,7 +58,7 @@ class TestStrategyGenerateKeywordList:
 			extension=self.test_extension_list[0],
 		)
 		for image_path in output:
-			await exif_crud.delete_all_keyword_list(file_path=image_path)
+			await exif_crud.delete_keyword_list(file_path=image_path)
 		yield output
 
 	@pytest.mark.asyncio

@@ -23,7 +23,7 @@ class TestReverseGeotagging:
 		# Verify the result
 		assert result == []
 
-		# Verify the function was called with the correct arguments
+	# Verify the function was called with the correct arguments
 
 	@pytest.mark.asyncio
 	async def test_generate_reverse_geo_tags_image_with_gps_values(
@@ -49,4 +49,4 @@ class TestReverseGeotagging:
 		)
 
 		# Verify the result
-		assert result == ["Netherlands", "Meester Jac. Takkade"]
+		assert result == ["Netherlands", "Aalsmeer", "Meester Jac. Takkade"]
