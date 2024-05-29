@@ -22,7 +22,6 @@ greenlet = "^3.0.3"
 pyexiftool = "^0.5.6"
 
 
-
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.1"
 pytest-asyncio = "^0.23.7"
@@ -48,17 +47,16 @@ indent-style = "tab"
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-testpaths = [
-    "tests",
-]
-pythonpath = [
-	"src"
-]
+testpaths = ["tests"]
+pythonpath = ["src"]
 addopts = [
-		"-ra",
-		"--cov=.",
-		"--cov-report=xml:tests/coverage/coverage.xml",
-		"--pdb",
-		"--cov-branch",
-		"tests/"
+	"-ra",
+	"-v",
+	# "--cov=.",
+	"--no-cov",
+	"--cov-report=xml:tests/coverage/coverage.xml",
+	"--pdb",
+	"--capture=fd",
+	"--cov-branch",
+	"tests/",
 ]
