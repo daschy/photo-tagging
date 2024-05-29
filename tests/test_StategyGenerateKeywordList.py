@@ -38,13 +38,17 @@ class TestStrategyGenerateKeywordList:
 		test_db_path: str = os.path.join(
 			self.test_directory_with_photos_path, strategy.get_db_name()
 		)
+		if os.path.exists(test_db_path):
+			os.remove(test_db_path)
 		test_db_conn_str: str = f"sqlite+aiosqlite:////{test_db_path}"
 		engine = await init_engine(test_db_conn_str)
 		sessionmaker = get_db_session(engine=engine)
 		session = sessionmaker()
 		yield session
-		async with engine.begin() as conn:
-			await conn.run_sync(BaseOrm.metadata.drop_all)
+		# async with engine.begin() as conn:
+		# await conn.run_sync(BaseOrm.metadata.drop_all)
+		if os.path.exists(test_db_path):
+			os.remove(test_db_path)
 
 	@pytest.fixture(scope="class")
 	def exif_crud(self):
