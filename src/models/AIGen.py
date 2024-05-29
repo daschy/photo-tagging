@@ -9,7 +9,7 @@ from models.Base import Base
 
 
 class AIGenParams(TypedDict):
-	text: Required[str]
+	pass
 
 
 ModelT = TypeVar("ModelT", bound=PreTrainedModel)
@@ -24,7 +24,7 @@ class AIGen(Base, Generic[ParamsT]):
 		self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
 	@abstractmethod
-	def ai_init(self) -> None:
+	def ai_init(self) -> "AIGen[ParamsT]":
 		pass
 
 	@abstractmethod

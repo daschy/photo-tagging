@@ -6,9 +6,9 @@ import itertools
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
 
 from models.AIGen import AIGen
-from models.AIGenPretrained import AIGenParamsPaliGemma
+from models.AIGenPaliGemma import AIGenParamsPaliGemma
 from models.orm.Photo import Photo
-from models.AIGenPipeline import TOKEN_TYPE, AIGenParamsBert
+from models.AIGenBert import TOKEN_TYPE, AIGenParamsBert
 from models.ExifFileCRUD import ExifFileCRUD
 from models.DBCRUD import DBCRUD
 
@@ -20,39 +20,50 @@ from utils.db_utils_async import get_db_session, init_engine
 class StrategyGenerateKeywordList(StrategyBase):
 	def __init__(
 		self,
-		image_to_text_ai: AIGen[AIGenParamsPaliGemma],
+		image_to_text_ai_list: List[AIGen[AIGenParamsPaliGemma]],
 		token_classification_ai: AIGen[AIGenParamsBert],
 		reverse_geotagging: ReverseGeotagging,
 	):
 		super().__init__()
-		self.image_to_text_ai: AIGen[AIGenParamsPaliGemma] = image_to_text_ai
-		self.image_to_text_ai.ai_init()
+		self.image_to_text_ai_list: List[AIGen[AIGenParamsPaliGemma]] = (
+			image_to_text_ai_list
+		)
 		self.token_classification_ai: AIGen[AIGenParamsBert] = token_classification_ai
 		self.token_classification_ai.ai_init()
 		self.reverse_geotagging: ReverseGeotagging = reverse_geotagging
 		self.exif_crud = ExifFileCRUD()
+		self.db_crud = DBCRUD(Photo)
+		for item in self.image_to_text_ai_list:
+			item.ai_init()
 
 	def _check_init(self):
-		if self.image_to_text_ai.is_init() is False:
-			raise ValueError("image_to_text_ai is not initialized")
+		for genai in self.image_to_text_ai_list:
+			if not genai.is_init():
+				raise ValueError(f"image_to_text_ai {genai.model_id} is not initialized")
 		if self.token_classification_ai.is_init() is False:
 			raise ValueError("token_classification_ai is not initialized")
 
 	def get_db_name(self) -> str:
-		image_to_text_ai_name = self.image_to_text_ai.model_id.replace("/", "_")
-		token_classification_ai = self.token_classification_ai.model_id.replace("/", "_")
-		return f"keywords__{image_to_text_ai_name}__{token_classification_ai}.db"
+		genai_name_list: str = "__".join(
+			list(
+				dict.fromkeys(
+					map(
+						lambda item: item.model_id.split("/")[1],
+						(self.image_to_text_ai_list + [self.token_classification_ai]),
+					)
+				)
+			)
+		)
+		return f"keywords__{genai_name_list}.db"
 
 	async def generate_keyword_list_image(self, image_path: str) -> List[str]:
 		try:
 			self._check_init()
 			caption_color_list: List[str] = list(
 				await asyncio.gather(
-					self.image_to_text_ai.generate(file_path=image_path, text="caption"),
-					self.image_to_text_ai.generate(
-						file_path=image_path,
-						text="what are the four most dominant colors in the picture?",
-					),
+					*[
+						genai.generate(file_path=image_path) for genai in self.image_to_text_ai_list
+					]
 				)
 			)  # type: ignore
 			text = " ".join(caption_color_list)
@@ -89,24 +100,19 @@ class StrategyGenerateKeywordList(StrategyBase):
 		self, db: AsyncSession, image_path: str, keyword_list: List[str]
 	) -> bool:
 		try:
-			photo_crud = DBCRUD(Photo)
 			new_photo = Photo(image_path)
 			new_photo.set_keyword_list(keyword_list)
-			await photo_crud.create(db, new_photo)
+			await self.db_crud.create(db, new_photo)
 			return True
 		except FileNotFoundError as e:
-			self.logger.exception(e, f"Failed to add keywords to {image_path}: {e}")
+			self.logger.exception(e, f"File {image_path}")
 			raise
 		except Exception as e:
-			self.logger.exception(e, f"Failed to add keywords to {image_path}: {e}")
+			self.logger.exception(e, "Failed save keywords to db")
 			raise
 
 	async def generate_keyword_list_directory(
-		self,
-		directory_path: str,
-		extension_list: List[str],
-		save_on_file: bool = False,
-		save_on_db: bool = True,
+		self, directory_path: str, extension_list: List[str], save_on_file: bool = False
 	) -> bool:
 		file_name_list: List[str] = []
 		for ext in extension_list:
@@ -122,21 +128,18 @@ class StrategyGenerateKeywordList(StrategyBase):
 			)
 		engine_path: str = os.path.join(directory_path, self.get_db_name())
 		engine_conn_str: str = f"sqlite+aiosqlite:////{engine_path}"
+		self.logger.info(f"saving keywords to {engine_conn_str}")
 		db_engine: AsyncEngine = await init_engine(engine_conn_str)
 		session = get_db_session(db_engine)
 		async with session() as db:
-			for idx, file_name in enumerate(file_name_list):
-				ext = os.path.splitext(file_name)[-1].lower()
-				file_path = file_name  # os.path.join(subdir, file_name)
-				photo_crud = DBCRUD(Photo)
-				retrieved_photo = await photo_crud.get_by(db, path=file_path)
+			for idx, file_path in enumerate(file_name_list):
+				ext = os.path.splitext(file_path)[-1].lower()
+				# photo_crud = DBCRUD(Photo)
+				retrieved_photo = await self.db_crud.get_by(db, path=file_path)
 				if retrieved_photo is None:
 					keyword_list = await self.generate_keyword_list_image(image_path=file_path)
 					self.logger.info(f"{os.path.split(file_path)[1]}: {keyword_list}")
-					if save_on_db:
-						await self.save_to_db(
-							db=db, image_path=file_path, keyword_list=keyword_list
-						)
+					await self.save_to_db(db=db, image_path=file_path, keyword_list=keyword_list)
 					if save_on_file:
 						await self.save_to_file(file_path=file_path, keyword_list=keyword_list)
 				self.logger.info(f"{idx + 1}/{len(file_name_list)} end")

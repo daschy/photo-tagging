@@ -112,6 +112,7 @@ class TestStrategyGenerateKeywordList:
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_directory_with_photos_path,
 			extension_list=self.test_extension_list,
+			save_on_file=False,
 		)
 		assert save_output
 		saved_entries: List[Photo] = await self.retrieve_test_db_entries(db=test_db)
@@ -121,7 +122,7 @@ class TestStrategyGenerateKeywordList:
 			assert len(file_keyword_list) == 0
 
 	@pytest.mark.asyncio
-	async def test_generate_keyword_list_directory_do_not_save_on_neither(
+	async def test_generate_keyword_list_directory_do_save_on_file_and_db(
 		self,
 		strategy: StrategyGenerateKeywordList,
 		file_path_list: List[str],
@@ -131,29 +132,6 @@ class TestStrategyGenerateKeywordList:
 		save_output = await strategy.generate_keyword_list_directory(
 			directory_path=self.test_directory_with_photos_path,
 			extension_list=self.test_extension_list,
-			save_on_db=False,
-			save_on_file=False,
-		)
-		assert save_output
-
-		saved_entries = await self.retrieve_test_db_entries(db=test_db)
-		assert len(saved_entries) == 0
-		for image_path in file_path_list:
-			file_keyword_list = await exif_crud.read_keyword_list(file_path=image_path)
-			assert len(file_keyword_list) == 0
-
-	@pytest.mark.asyncio
-	async def test_generate_keyword_list_directory_do_save_on_both(
-		self,
-		strategy: StrategyGenerateKeywordList,
-		file_path_list: List[str],
-		test_db: AsyncSession,
-		exif_crud: ExifFileCRUD,
-	):
-		save_output = await strategy.generate_keyword_list_directory(
-			directory_path=self.test_directory_with_photos_path,
-			extension_list=self.test_extension_list,
-			save_on_db=True,
 			save_on_file=True,
 		)
 		assert save_output
@@ -165,25 +143,3 @@ class TestStrategyGenerateKeywordList:
 			photo_entry = next(x for x in saved_entries if x.path == file_path)
 			assert len(file_keyword_list) == len(photo_entry.keyword_list)
 			assert file_keyword_list == photo_entry.keyword_list
-
-	@pytest.mark.asyncio
-	async def test_generate_keyword_list_directory_do_save_on_file_only(
-		self,
-		strategy: StrategyGenerateKeywordList,
-		file_path_list: List[str],
-		test_db: AsyncSession,
-		exif_crud: ExifFileCRUD,
-	):
-		save_output = await strategy.generate_keyword_list_directory(
-			directory_path=self.test_directory_with_photos_path,
-			extension_list=self.test_extension_list,
-			save_on_db=False,
-			save_on_file=True,
-		)
-		assert save_output
-
-		saved_entries: List[Photo] = await self.retrieve_test_db_entries(db=test_db)
-		assert len(saved_entries) == 0
-		for image_path in file_path_list:
-			file_keyword_list = await exif_crud.read_keyword_list(file_path=image_path)
-			assert len(file_keyword_list) > 0

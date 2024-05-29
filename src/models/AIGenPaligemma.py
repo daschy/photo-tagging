@@ -1,12 +1,9 @@
 import os
-from typing import Tuple
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from transformers import (
 	PaliGemmaForConditionalGeneration,
 	PaliGemmaProcessor,
-	PreTrainedModel,
-	ProcessorMixin,
 )
 from models.AIGen import AIGen, AIGenParams
 from PIL import Image
@@ -16,9 +13,10 @@ class AIGenParamsPaliGemma(AIGenParams):
 	img_path: str
 
 
-class AIGenPretrained(AIGen[AIGenParamsPaliGemma]):
-	def __init__(self, model_id: str):
+class AIGenPaliGemma(AIGen[AIGenParamsPaliGemma]):
+	def __init__(self, model_id: str, prompt: str):
 		super().__init__(model_id=model_id)
+		self.prompt = prompt
 
 	def is_init(
 		self,
@@ -27,7 +25,7 @@ class AIGenPretrained(AIGen[AIGenParamsPaliGemma]):
 
 	def ai_init(
 		self,
-	) -> None:
+	) -> "AIGen[AIGenParamsPaliGemma]":
 		self.logger.debug("start create model")
 		self.model = PaliGemmaForConditionalGeneration.from_pretrained(
 			self.model_id, token=os.environ.get("HF_TOKEN")
@@ -36,6 +34,7 @@ class AIGenPretrained(AIGen[AIGenParamsPaliGemma]):
 		self.logger.debug("start create processor")
 		self.processor = PaliGemmaProcessor.from_pretrained(self.model_id)
 		self.logger.debug("end create model")
+		return self
 
 	async def generate(
 		self,
@@ -43,22 +42,22 @@ class AIGenPretrained(AIGen[AIGenParamsPaliGemma]):
 	) -> str:
 		return await self._generate_text(
 			file_path=kwargs.get("file_path"),  # type: ignore
-			text=kwargs.get("text"),  # type: ignore
+			prompt=self.prompt,  # type: ignore
 		)
 
-	async def _generate_text(self, file_path: str, text: str) -> str:
+	async def _generate_text(self, file_path: str, prompt: str) -> str:
 		with Image.open(file_path) as image:
 			loop = asyncio.get_running_loop()
 			with ThreadPoolExecutor() as pool:
-				if text is not None and len(text) > 0:
-					processor: PaliGemmaProcessor = self.processor # type: ignore
-					model_inputs = processor(images=image, text=text, return_tensors="pt").to(
+				if prompt is not None and len(prompt) > 0:
+					processor: PaliGemmaProcessor = self.processor  # type: ignore
+					model_inputs = processor(images=image, text=prompt, return_tensors="pt").to(
 						self.device
 					)
 					input_len = model_inputs["input_ids"].shape[-1]
 					generation = await loop.run_in_executor(
 						pool,
-						lambda: self.model.generate( # type: ignore
+						lambda: self.model.generate(  # type: ignore
 							**model_inputs,
 							max_new_tokens=50,
 							do_sample=False,
