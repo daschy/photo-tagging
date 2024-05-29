@@ -15,6 +15,5 @@ class StrategyBase(Base):
 		directory_path: str,
 		extension_list: List[str],
 		save_on_file: bool,
-		save_on_db: bool,
 	) -> bool:
 		pass

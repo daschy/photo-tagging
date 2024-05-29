@@ -1,13 +1,11 @@
-from typing import List, Generic
-from typing_extensions import Unpack
+from typing import List
 import asyncio
 from enum import Enum
+from typing_extensions import Required
 from concurrent.futures import ThreadPoolExecutor
 from transformers import (
 	pipeline,
 	Pipeline,
-	PreTrainedModel,
-	AutoTokenizer,
 )
 from models.AIGen import AIGen, AIGenParams
 
@@ -19,9 +17,10 @@ class TOKEN_TYPE(Enum):
 
 class AIGenParamsBert(AIGenParams):
 	token_type: TOKEN_TYPE
+	text: Required[str]
 
 
-class AIGenPipeline(AIGen[AIGenParamsBert]):
+class AIGenBert(AIGen[AIGenParamsBert]):
 	def __init__(self, model_id: str, aggregation_strategy: str = "simple"):
 		super().__init__(model_id=model_id)
 		self.aggregation_strategy = aggregation_strategy
@@ -33,7 +32,7 @@ class AIGenPipeline(AIGen[AIGenParamsBert]):
 
 	def ai_init(
 		self,
-	) -> None:
+	) -> "AIGen[AIGenParamsBert]":
 		self.logger.debug("start create pipeline")
 		self.pipeline: Pipeline = pipeline(
 			model=self.model_id,
@@ -42,7 +41,7 @@ class AIGenPipeline(AIGen[AIGenParamsBert]):
 		self.logger.debug("end create pipeline")
 		self.model = self.pipeline.model
 		self.processor = self.pipeline.tokenizer
-		return self.model, self.processor  # type: ignore
+		return self  # type: ignore
 
 	async def generate(
 		self,

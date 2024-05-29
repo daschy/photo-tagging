@@ -162,6 +162,7 @@ cython_debug/
 .idea/
 
 src/**/playground_data/*.json
+tests/test_data/copy*
 
 .DS_Store
 *.db

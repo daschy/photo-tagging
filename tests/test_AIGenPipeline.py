@@ -1,9 +1,9 @@
 import pytest
 from models.AIGen import AIGen
-from models.AIGenPipeline import (
+from models.AIGenBert import (
 	TOKEN_TYPE,
 	AIGenParamsBert,
-	AIGenPipeline,
+	AIGenBert,
 )
 
 
@@ -13,7 +13,7 @@ class TestAIGenPipeline:
 	@classmethod
 	def setup_class(cls):
 		assert True
-		cls.ai_gen: AIGen[AIGenParamsBert] = AIGenPipeline(
+		cls.ai_gen: AIGen[AIGenParamsBert] = AIGenBert(
 			model_id="vblagoje/bert-english-uncased-finetuned-pos",
 		)
 		cls.ai_gen.ai_init()
