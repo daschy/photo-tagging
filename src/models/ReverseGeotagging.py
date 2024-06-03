@@ -57,7 +57,11 @@ class ReverseGeotagging(Base):
 
 			result = Location()
 			result.road = address_components.get("road", None)
-			result.city = address_components.get("city", address_components.get("town", None))
+			result.city = (
+				address_components.get("city", None)
+				or address_components.get("town", None)
+				or address_components.get("village", None)
+			)
 			result.state = address_components.get("state", None)
 			result.country = address_components.get("country", None)
 			result.postal_code = address_components.get("postcode", None)
