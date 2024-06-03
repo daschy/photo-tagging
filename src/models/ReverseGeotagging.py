@@ -8,18 +8,19 @@ from models.ExifFileCRUD import ExifFileCRUD
 
 class Location(Base):
 	def __init__(self):
+		super().__init__()
 		self.city = None
 		self.state = None
 		self.country = None
 		self.postal_code = None
-		self.road = None
+		self.suburb_or_road = None
 
 
 class ReverseGeotagging(Base):
 	def __init__(self):
 		super().__init__()
 		self.exif_crud = ExifFileCRUD()
-		self.geolocator = Nominatim(user_agent="reverse_geotagger")
+		self.geolocator = Nominatim(user_agent="reverse_geotagger", timeout=100) # type: ignore
 
 	def _dms_to_decimal(self, dms_string):
 		parts = dms_string.split(" ")
@@ -56,7 +57,9 @@ class ReverseGeotagging(Base):
 			address_components = location.raw.get("address", {})
 
 			result = Location()
-			result.road = address_components.get("road", None)
+			result.suburb_or_road = address_components.get(
+				"suburb", None
+			) or address_components.get("road", None)
 			result.city = (
 				address_components.get("city", None)
 				or address_components.get("town", None)
@@ -77,6 +80,8 @@ class ReverseGeotagging(Base):
 		else:
 			address: Location = self._reverse_geotag(lat, long)  # type: ignore
 			output: List[str] = [
-				x for x in [address.country, address.city, address.road] if x is not None
+				x
+				for x in [address.country, address.city, address.suburb_or_road]
+				if x is not None
 			]
 		return output

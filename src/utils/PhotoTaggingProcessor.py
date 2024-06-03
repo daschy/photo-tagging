@@ -12,6 +12,6 @@ class PhotoTaggingProcessor(Base):
 	async def execute(self, directory_path: str, dry_run: bool = True) -> bool:
 		return await self.strategy.generate_keyword_list_directory(
 			directory_path=directory_path,
-			extension_list=["png", "jpg", "jpeg", "tiff", "nef", "tiff"],
+			extension_list=["nef", "jpg", "jpeg"],
 			save_on_file=not dry_run,
 		)

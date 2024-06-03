@@ -134,13 +134,19 @@ class StrategyGenerateKeywordList(StrategyBase):
 		async with session() as db:
 			for idx, file_path in enumerate(file_name_list):
 				ext = os.path.splitext(file_path)[-1].lower()
-				# photo_crud = DBCRUD(Photo)
+				file_name = os.path.split(file_path)[1]
 				retrieved_photo = await self.db_crud.get_by(db, path=file_path)
 				if retrieved_photo is None:
-					keyword_list = await self.generate_keyword_list_image(image_path=file_path)
-					self.logger.info(f"{os.path.split(file_path)[1]}: {keyword_list}")
+					keyword_list: List[str] = await self.generate_keyword_list_image(
+						image_path=file_path
+					)
+					self.logger.info(f"{file_name}: {keyword_list}")
 					await self.save_to_db(db=db, image_path=file_path, keyword_list=keyword_list)
 					if save_on_file:
 						await self.save_to_file(file_path=file_path, keyword_list=keyword_list)
-				self.logger.info(f"{idx + 1}/{len(file_name_list)} end")
+				else:
+					if save_on_file:
+						keyword_list: List[str] = retrieved_photo.keyword_list  # type: ignore
+						await self.save_to_file(file_path=file_path, keyword_list=keyword_list)
+				self.logger.info(f"{file_name}: {idx + 1}/{len(file_name_list)} end")
 		return True
