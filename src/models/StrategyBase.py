@@ -14,6 +14,7 @@ class StrategyBase(Base):
 		self,
 		directory_path: str,
 		extension_list: List[str],
+		exclude_path_list: List[str],
 		save_on_file: bool,
 	) -> bool:
 		pass

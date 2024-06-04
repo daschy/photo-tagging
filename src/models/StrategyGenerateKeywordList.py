@@ -112,7 +112,11 @@ class StrategyGenerateKeywordList(StrategyBase):
 			raise
 
 	async def generate_keyword_list_directory(
-		self, directory_path: str, extension_list: List[str], save_on_file: bool = False
+		self,
+		directory_path: str,
+		extension_list: List[str],
+		exclude_path_list: List[str] = None,  # type: ignore
+		save_on_file: bool = False,
 	) -> bool:
 		file_name_list: List[str] = []
 		for ext in extension_list:
@@ -131,6 +135,14 @@ class StrategyGenerateKeywordList(StrategyBase):
 		self.logger.info(f"saving keywords to {engine_conn_str}")
 		db_engine: AsyncEngine = await init_engine(engine_conn_str)
 		session = get_db_session(db_engine)
+		file_name_list = list(
+			filter(
+				lambda item: any(
+					excluded_dir not in item for excluded_dir in exclude_path_list
+				),
+				file_name_list,
+			)
+		)
 		async with session() as db:
 			for idx, file_path in enumerate(file_name_list):
 				ext = os.path.splitext(file_path)[-1].lower()

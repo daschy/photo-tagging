@@ -26,9 +26,13 @@ async def main(root_dir: str):
 	)
 	processor.set_strategy(strategy=strategy)
 
-	await processor.execute(root_dir, dry_run=True)
+	await processor.execute(
+		root_dir,
+		exclude_dir_list=["From-backup"],
+		dry_run=True,
+	)
 
 
 if __name__ == "__main__":
-	directory = "/Users/1q82/Pictures/Photos/SouthKorea"
+	directory = "/Users/1q82/Pictures/Photos"
 	asyncio.run(main(directory))
