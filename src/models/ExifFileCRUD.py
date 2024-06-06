@@ -47,18 +47,22 @@ class ExifFileCRUD(Base):
 		)
 		return exif_data[0].get(_EXIF_TAG_KEYWORDS, [])
 
-	async def save_gps_data(self, file_path: str, dms_lat: str, dms_lon: str) -> bool:
+	async def save_gps_data(self, file_path: str, lat: str, lon: str) -> bool:
 		await self._execute_exiftool(
 			args=[
-				f"-{_EXIF_TAG_GPS_LATITUDE}={dms_lat}",
-				f"-{_EXIF_TAG_GPS_LONGITUDE}={dms_lon}",
+				f"-{_EXIF_TAG_GPS_LATITUDE}*={lat}",
+				f"-{_EXIF_TAG_GPS_LONGITUDE}*={lon}",
 				"-json",
 			],
 			file_path=file_path,
 		)
 		return True
 
-	async def read_gps_data(self, file_path: str) -> tuple:
+	async def save_gps_data_decimal(self, file_path: str, lat: float, lon: float) -> bool:
+		await self.save_gps_data(file_path=file_path, lat=f"{lat}", lon=f"{lon}")
+		return True
+
+	async def read_gps_data(self, file_path: str) -> tuple[str, str]:
 		exif_data = await self._execute_exiftool(
 			args=[f"-{_EXIF_TAG_GPS_LATITUDE}", f"-{_EXIF_TAG_GPS_LONGITUDE}", "-json"],
 			file_path=file_path,
@@ -82,6 +86,9 @@ class ExifFileCRUD(Base):
 			backup_file = f"{file_path}_original"
 			if os.path.exists(backup_file):
 				os.remove(backup_file)
+
+			# if bool(stderr.decode()):
+			# 	raise ChildProcessError(stderr.decode())
 
 			if not bool(stdout.decode()):
 				return {}

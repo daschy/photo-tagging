@@ -13,14 +13,14 @@ class Location(Base):
 		self.state = None
 		self.country = None
 		self.postal_code = None
-		self.suburb_or_road = None
+		self.poi = None
 
 
 class ReverseGeotagging(Base):
 	def __init__(self):
 		super().__init__()
 		self.exif_crud = ExifFileCRUD()
-		self.geolocator = Nominatim(user_agent="reverse_geotagger", timeout=100) # type: ignore
+		self.geolocator = Nominatim(user_agent="reverse_geotagger", timeout=100)  # type: ignore
 
 	def _dms_to_decimal(self, dms_string):
 		parts = dms_string.split(" ")
@@ -57,9 +57,12 @@ class ReverseGeotagging(Base):
 			address_components = location.raw.get("address", {})
 
 			result = Location()
-			result.suburb_or_road = address_components.get(
-				"suburb", None
-			) or address_components.get("road", None)
+			result.poi = (
+				address_components.get("historic", None)
+				or address_components.get("amenity", None)
+				or address_components.get("suburb", None)
+				or address_components.get("road", None)
+			)
 			result.city = (
 				address_components.get("city", None)
 				or address_components.get("town", None)
@@ -81,7 +84,7 @@ class ReverseGeotagging(Base):
 			address: Location = self._reverse_geotag(lat, long)  # type: ignore
 			output: List[str] = [
 				x
-				for x in [address.country, address.city, address.suburb_or_road]
+				for x in [address.country, address.city, address.poi or address.state]
 				if x is not None
 			]
 		return output
