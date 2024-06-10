@@ -118,34 +118,16 @@ class StrategyGenerateKeywordList(StrategyBase):
 		exclude_path_list: List[str] = None,  # type: ignore
 		save_on_file: bool = False,
 	) -> bool:
-		file_name_list: List[str] = []
-		for ext in extension_list:
-			pattern = os.path.join(directory_path, "**", f"*.{ext.lower()}")
-			file_name_list += glob(
-				pattern,
-				recursive=True,
-			)
-			pattern = os.path.join(directory_path, "**", f"*.{ext.upper()}")
-			file_name_list += glob(
-				pattern,
-				recursive=True,
-			)
+		file_name_list = self.get_file_list(
+			directory_path, extension_list, exclude_path_list
+		)
 		engine_path: str = os.path.join(directory_path, self.get_db_name())
 		engine_conn_str: str = f"sqlite+aiosqlite:////{engine_path}"
 		self.logger.info(f"saving keywords to {engine_conn_str}")
 		db_engine: AsyncEngine = await init_engine(engine_conn_str)
 		session = get_db_session(db_engine)
-		file_name_list = list(
-			filter(
-				lambda item: any(
-					excluded_dir not in item for excluded_dir in exclude_path_list
-				),
-				file_name_list,
-			)
-		)
 		async with session() as db:
 			for idx, file_path in enumerate(file_name_list):
-				ext = os.path.splitext(file_path)[-1].lower()
 				file_name = os.path.split(file_path)[1]
 				retrieved_photo = await self.db_crud.get_by(db, path=file_path)
 				if retrieved_photo is None:
