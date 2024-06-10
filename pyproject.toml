@@ -1,4 +1,3 @@
-
 [tool.poetry]
 name = "milotagging"
 version = "0.1.0"
@@ -44,6 +43,8 @@ exclude = ["./**"]
 # Use tabs instead of 4 space indentation.
 indent-style = "tab"
 
+[tool.pytest]
+mock_use_standalone_module = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
