@@ -26,6 +26,7 @@ pytest = "^8.2.1"
 pytest-asyncio = "^0.23.7"
 requests = "^2.32.2"
 prettyprinter = "^0.18.0"
+pytest-mock = "^3.14.0"
 
 [build-system]
 requires = ["poetry-core"]
@@ -43,21 +44,19 @@ exclude = ["./**"]
 # Use tabs instead of 4 space indentation.
 indent-style = "tab"
 
-[tool.pytest]
-mock_use_standalone_module = true
-
 [tool.pytest.ini_options]
+mock_use_standalone_module = true
 minversion = "6.0"
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = [
 	"-ra",
-	"-v",
-	# "--cov=.",
-	"--no-cov",
-	"--cov-report=xml:tests/coverage/coverage.xml",
-	"--pdb",
-	"--capture=fd",
-	"--cov-branch",
+	"-vv",
 	"tests/",
+	"--no-cov",
+	# "--cov=.",
+	# "--cov-report=xml:tests/coverage/coverage.xml",
+	"--pdb",
+	# "--capture=fd",
+	# "--cov-branch",
 ]
