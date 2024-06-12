@@ -2,12 +2,8 @@ import os
 import pytest
 import pytest_asyncio
 from typing import List
-from pytest_mock import MockerFixture
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.AIGenBert import AIGenBert
-from models.AIGenPaliGemma import AIGenPaliGemma
 from models.ExifFileCRUD import ExifFileCRUD
-from models.ReverseGeotagging import ReverseGeotagging
 from models.orm.Photo import Photo
 from models.DBCRUD import DBCRUD
 from models.StrategyGenerateKeywordList import (

@@ -1,8 +1,9 @@
 from collections.abc import Generator
 import pytest
-
+from mock import patch, PropertyMock
 from pytest_mock import MockerFixture
-from models.AIGenBert import AIGenBert
+from models.AIGen import AIGen
+from models.AIGenBert import TOKEN_TYPE, AIGenBert
 from models.AIGenPaliGemma import AIGenPaliGemma
 from models.DBCRUD import DBCRUD
 from models.ExifFileCRUD import ExifFileCRUD
@@ -19,7 +20,7 @@ def test_keyword_list_caption():
 		"sky",
 		"windmill",
 	]
-	yield output
+	return output
 
 
 @pytest.fixture(scope="module")
@@ -29,7 +30,7 @@ def test_keyword_list_colors():
 		"blue",
 		"white",
 	]
-	yield output
+	return output
 
 
 @pytest.fixture(scope="module")
@@ -39,7 +40,7 @@ def test_keyword_list_address():
 		"Meester Jac. Takkade",
 		"Netherlands",
 	]
-	yield output
+	return output
 
 
 @pytest.fixture(scope="module")
@@ -98,29 +99,63 @@ def mock_db_exif_file_crud(
 @pytest.fixture(scope="module", autouse=True)
 def strategy_gen_keyword_list(
 	module_mocker: MockerFixture,
+	test_keyword_list_caption: list[str],
+	test_keyword_list_colors: list[str],
 	mock_reverse_geotaggin_xml: ReverseGeotagging,
 	mock_db_crud_photo: DBCRUD[Photo],
 	mock_db_exif_file_crud: ExifFileCRUD,
 ):
+	module_mocker.patch.object(
+		AIGenPaliGemma,
+		"is_init",
+		return_value=True,
+	)
+	module_mocker.patch.object(
+		AIGenPaliGemma,
+		"ai_init",
+		return_value=None,
+	)
+
+	module_mocker.patch.object(
+		AIGenPaliGemma,
+		"_generate_text",
+		side_effect=lambda file_path, prompt: (
+			"A windmill with a blue sky in the background."
+			if prompt == "caption"
+			else "blue,white and black"
+		),
+	)
+
 	mock_ai_paligemma_caption = AIGenPaliGemma(
 		model_id="google/paligemma-3b-ft-cococap-448",
 		prompt="caption",
 	)
-	module_mocker.patch.object(
-		mock_ai_paligemma_caption,
-		"generate",
-		return_value="A windmill with a blue sky in the background.",
-	)
+
 	mock_ai_paligemma_colors = AIGenPaliGemma(
 		model_id="google/paligemma-3b-ft-cococap-448",
-		prompt="what are the four most dominant colors in the picture?",
-	)
-	module_mocker.patch.object(
-		mock_ai_paligemma_colors,
-		"generate",
-		return_value="blue,white and black",
+		prompt="colors",
 	)
 
+	module_mocker.patch.object(
+		AIGenBert,
+		"is_init",
+		return_value=True,
+	)
+	module_mocker.patch.object(
+		AIGenBert,
+		"ai_init",
+		return_value=None,
+	)
+
+	module_mocker.patch.object(
+		AIGenBert,
+		"generate",
+		side_effect=lambda token_type, text: (
+			test_keyword_list_caption
+			if token_type == TOKEN_TYPE.NOUN
+			else test_keyword_list_colors
+		),
+	)
 	mock_token_classificator = AIGenBert(
 		model_id="vblagoje/bert-english-uncased-finetuned-pos",
 	)
