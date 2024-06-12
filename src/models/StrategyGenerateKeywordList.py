@@ -1,6 +1,5 @@
 import asyncio
 import os
-from glob import glob
 from typing import List
 import itertools
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine
@@ -23,6 +22,8 @@ class StrategyGenerateKeywordList(StrategyBase):
 		image_to_text_ai_list: List[AIGen[AIGenParamsPaliGemma]],
 		token_classification_ai: AIGen[AIGenParamsBert],
 		reverse_geotagging: ReverseGeotagging,
+		db_crud: DBCRUD[Photo],
+		exif_crud: ExifFileCRUD,
 	):
 		super().__init__()
 		self.image_to_text_ai_list: List[AIGen[AIGenParamsPaliGemma]] = (
@@ -31,8 +32,8 @@ class StrategyGenerateKeywordList(StrategyBase):
 		self.token_classification_ai: AIGen[AIGenParamsBert] = token_classification_ai
 		self.token_classification_ai.ai_init()
 		self.reverse_geotagging: ReverseGeotagging = reverse_geotagging
-		self.exif_crud = ExifFileCRUD()
-		self.db_crud = DBCRUD(Photo)
+		self.exif_crud = exif_crud
+		self.db_crud = db_crud
 		for item in self.image_to_text_ai_list:
 			item.ai_init()
 
@@ -55,6 +56,9 @@ class StrategyGenerateKeywordList(StrategyBase):
 			)
 		)
 		return f"keywords__{genai_name_list}.db"
+
+	async def is_file_processed(self, photo: Photo) -> bool:
+		return await super().is_file_processed(photo)
 
 	async def generate_keyword_list_image(self, image_path: str) -> List[str]:
 		try:

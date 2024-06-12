@@ -4,6 +4,7 @@ from abc import abstractmethod
 from typing import List
 
 from models.Base import Base
+from models.orm.Photo import Photo
 
 
 class StrategyBase(Base):
@@ -31,6 +32,10 @@ class StrategyBase(Base):
 			]
 			file_name_list = ex_file_name_list
 		return file_name_list
+
+	@abstractmethod
+	async def is_file_processed(self, photo: Photo) -> bool:
+		pass
 
 	@abstractmethod
 	async def generate_keyword_list_image(self, image_path: str) -> List[str]:
