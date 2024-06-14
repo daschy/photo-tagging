@@ -1,6 +1,6 @@
 from collections.abc import Generator
 import pytest
-from mock import patch, PropertyMock
+from mock import patch, PropertyMock, MagicMock
 from pytest_mock import MockerFixture
 from models.AIGen import AIGen
 from models.AIGenBert import TOKEN_TYPE, AIGenBert
@@ -97,13 +97,8 @@ def mock_db_exif_file_crud(
 
 
 @pytest.fixture(scope="module")
-def strategy_gen_keyword_list(
+def mock_ai_gen_paligemma(
 	module_mocker: MockerFixture,
-	test_keyword_list_caption: list[str],
-	test_keyword_list_colors: list[str],
-	mock_reverse_geotaggin_xml: ReverseGeotagging,
-	mock_db_crud_photo: DBCRUD[Photo],
-	mock_db_exif_file_crud: ExifFileCRUD,
 ):
 	module_mocker.patch.object(
 		AIGenPaliGemma,
@@ -126,42 +121,29 @@ def strategy_gen_keyword_list(
 		),
 	)
 
-	mock_ai_paligemma_caption = AIGenPaliGemma(
-		model_id="google/paligemma-3b-ft-cococap-448",
-		prompt="caption",
-	)
+	def make_caption():
+		mock_ai_paligemma_caption = AIGenPaliGemma(
+			model_id="google/paligemma-3b-ft-cococap-448",
+			prompt="caption",
+		)
+		return mock_ai_paligemma_caption
 
-	mock_ai_paligemma_colors = AIGenPaliGemma(
-		model_id="google/paligemma-3b-ft-cococap-448",
-		prompt="colors",
-	)
+	def make_colors():
+		mock_ai_paligemma_colors = AIGenPaliGemma(
+			model_id="google/paligemma-3b-ft-cococap-448",
+			prompt="colors",
+		)
+		return mock_ai_paligemma_colors
 
-	module_mocker.patch.object(
-		AIGenPaliGemma,
-		"is_init",
-		return_value=True,
-	)
-	module_mocker.patch.object(
-		AIGenPaliGemma,
-		"ai_init",
-		return_value=None,
-	)
+	yield make_caption, make_colors
 
-	module_mocker.patch.object(
-		AIGenPaliGemma,
-		"_generate_text",
-		side_effect=lambda file_path, prompt: (
-			"A windmill with a blue sky in the background."
-			if prompt == "caption"
-			else "blue,white and black"
-		),
-	)
 
-	mock_ai_paligemma_colors = AIGenPaliGemma(
-		model_id="google/paligemma-3b-ft-cococap-448",
-		prompt="colors",
-	)
-
+@pytest.fixture(scope="module")
+def mock_ai_gen_bert(
+	module_mocker: MockerFixture,
+	test_keyword_list_caption: list[str],
+	test_keyword_list_colors: list[str],
+):
 	module_mocker.patch.object(
 		AIGenBert,
 		"is_init",
@@ -185,6 +167,21 @@ def strategy_gen_keyword_list(
 	mock_token_classificator = AIGenBert(
 		model_id="vblagoje/bert-english-uncased-finetuned-pos",
 	)
+	yield mock_token_classificator
+
+
+@pytest.fixture(scope="module")
+def strategy_gen_keyword_list(
+	module_mocker: MockerFixture,
+	mock_reverse_geotaggin_xml: ReverseGeotagging,
+	mock_db_crud_photo: DBCRUD[Photo],
+	mock_db_exif_file_crud: ExifFileCRUD,
+	mock_ai_gen_paligemma,
+	mock_ai_gen_bert,
+):
+	mock_ai_paligemma_caption = mock_ai_gen_paligemma[0]()
+	mock_ai_paligemma_colors = mock_ai_gen_paligemma[1]()
+	mock_token_classificator = mock_ai_gen_bert
 
 	output = StrategyGenerateKeywordList(
 		image_to_text_ai_list=[
