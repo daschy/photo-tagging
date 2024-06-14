@@ -96,7 +96,7 @@ def mock_db_exif_file_crud(
 	yield mock_output
 
 
-@pytest.fixture(scope="module", autouse=True)
+@pytest.fixture(scope="module")
 def strategy_gen_keyword_list(
 	module_mocker: MockerFixture,
 	test_keyword_list_caption: list[str],
@@ -129,6 +129,32 @@ def strategy_gen_keyword_list(
 	mock_ai_paligemma_caption = AIGenPaliGemma(
 		model_id="google/paligemma-3b-ft-cococap-448",
 		prompt="caption",
+	)
+
+	mock_ai_paligemma_colors = AIGenPaliGemma(
+		model_id="google/paligemma-3b-ft-cococap-448",
+		prompt="colors",
+	)
+
+	module_mocker.patch.object(
+		AIGenPaliGemma,
+		"is_init",
+		return_value=True,
+	)
+	module_mocker.patch.object(
+		AIGenPaliGemma,
+		"ai_init",
+		return_value=None,
+	)
+
+	module_mocker.patch.object(
+		AIGenPaliGemma,
+		"_generate_text",
+		side_effect=lambda file_path, prompt: (
+			"A windmill with a blue sky in the background."
+			if prompt == "caption"
+			else "blue,white and black"
+		),
 	)
 
 	mock_ai_paligemma_colors = AIGenPaliGemma(

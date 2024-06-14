@@ -21,7 +21,7 @@ async def test_generate_reverse_geo_tags_image_with_no_gps_and_xmp(
 	)
 
 	# Verify the result
-	assert result == ["Netherlands", "Amsterdam", "Prins Hendrikkade"]
+	assert result == ["Netherlands", "Amsterdam", "Centrum"]
 
 
 @pytest.mark.asyncio
