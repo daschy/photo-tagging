@@ -97,7 +97,7 @@ def mock_db_exif_file_crud(
 
 
 @pytest.fixture(scope="module")
-def mock_ai_gen_paligemma(
+def mock_ai_gen_paligemma_list(
 	module_mocker: MockerFixture,
 ):
 	module_mocker.patch.object(
@@ -176,11 +176,11 @@ def strategy_gen_keyword_list(
 	mock_reverse_geotaggin_xml: ReverseGeotagging,
 	mock_db_crud_photo: DBCRUD[Photo],
 	mock_db_exif_file_crud: ExifFileCRUD,
-	mock_ai_gen_paligemma,
+	mock_ai_gen_paligemma_list,
 	mock_ai_gen_bert,
 ):
-	mock_ai_paligemma_caption = mock_ai_gen_paligemma[0]()
-	mock_ai_paligemma_colors = mock_ai_gen_paligemma[1]()
+	mock_ai_paligemma_caption = mock_ai_gen_paligemma_list[0]()
+	mock_ai_paligemma_colors = mock_ai_gen_paligemma_list[1]()
 	mock_token_classificator = mock_ai_gen_bert
 
 	output = StrategyGenerateKeywordList(

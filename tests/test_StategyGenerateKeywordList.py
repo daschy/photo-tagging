@@ -10,7 +10,7 @@ from models.StrategyGenerateKeywordList import (
 	StrategyGenerateKeywordList,
 )
 
-from utils.db_utils_async import get_db_session, init_engine
+from utils.db_utils_async import get_db_session, create_engine
 from tests.test_utils.test_utils import get_all_file_dir
 
 
@@ -19,6 +19,7 @@ test_image_path: str = os.path.join(
 )
 test_directory_with_photos_path: str = os.path.join(os.getcwd(), "tests", "test_data")
 test_extension_list = ["nef"]
+
 
 @pytest_asyncio.fixture(scope="function")
 async def file_path_list(exif_crud: ExifFileCRUD):
@@ -41,7 +42,7 @@ async def test_db(
 	if os.path.exists(test_db_path):
 		os.remove(test_db_path)
 	test_db_conn_str: str = f"sqlite+aiosqlite:////{test_db_path}"
-	engine = await init_engine(test_db_conn_str)
+	engine = await create_engine(test_db_conn_str)
 	sessionmaker = get_db_session(engine=engine)
 	session: AsyncSession = sessionmaker()
 	yield session
@@ -59,17 +60,19 @@ async def retrieve_test_db_entries(db: AsyncSession) -> list:
 
 
 @pytest.mark.asyncio
-async def test_generate_keyword_list_image(
+async def test_generate_keyword_list_single_file(
 	strategy_gen_keyword_list: StrategyGenerateKeywordList,
 	test_keyword_list: List[str],
 ):
-	keyword_list = await strategy_gen_keyword_list.generate_keyword_list_image(image_path=test_image_path)
+	keyword_list = await strategy_gen_keyword_list.generate_keyword_list_image(
+		image_path=test_image_path
+	)
 	assert len(keyword_list) == len(test_keyword_list)
 	assert keyword_list == test_keyword_list
 
 
 @pytest.mark.asyncio
-async def test_save_to_db(
+async def test_save_keyword_list_to_db(
 	strategy_gen_keyword_list: StrategyGenerateKeywordList,
 	test_db: AsyncSession,
 	test_keyword_list: List[str],
@@ -83,7 +86,7 @@ async def test_save_to_db(
 
 
 @pytest.mark.asyncio
-async def test_save_to_file(
+async def test_save_keyword_list_to_file(
 	# self,
 	strategy_gen_keyword_list: StrategyGenerateKeywordList,
 	test_keyword_list: List[str],
@@ -92,15 +95,23 @@ async def test_save_to_file(
 		file_path=test_image_path, keyword_list=test_keyword_list
 	)
 	assert save_output
-	keyword_list_read_from_file = await strategy_gen_keyword_list.exif_crud.read_keyword_list(
-		test_image_path
+	keyword_list_read_from_file = (
+		await strategy_gen_keyword_list.exif_crud.read_keyword_list(test_image_path)
 	)
 	assert len(test_keyword_list) == len(keyword_list_read_from_file)
 	assert test_keyword_list == keyword_list_read_from_file
 
 
 @pytest.mark.asyncio
-async def test_generate_keyword_list_directory_do_save_on_db_only(
+async def test_generate_keyword_list_for_directory_with_no_files(
+	strategy_gen_keyword_list: StrategyGenerateKeywordList,
+	test_keyword_list: List[str],
+):
+	pass
+
+
+@pytest.mark.asyncio
+async def test_generate_keyword_list_for_directory_and_save_to_db_only(
 	# self,
 	strategy_gen_keyword_list: StrategyGenerateKeywordList,
 	file_path_list: List[str],
@@ -121,7 +132,7 @@ async def test_generate_keyword_list_directory_do_save_on_db_only(
 
 
 @pytest.mark.asyncio
-async def test_generate_keyword_list_directory_do_save_on_file_and_db(
+async def test_generate_keyword_list_directory_and_save_on_file_and_db(
 	strategy_gen_keyword_list: StrategyGenerateKeywordList,
 	file_path_list: List[str],
 	test_db: AsyncSession,

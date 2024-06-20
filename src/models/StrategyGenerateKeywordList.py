@@ -13,7 +13,7 @@ from models.DBCRUD import DBCRUD
 
 from models.ReverseGeotagging import ReverseGeotagging
 from models.StrategyBase import StrategyBase
-from utils.db_utils_async import get_db_session, init_engine
+from utils.db_utils_async import get_db_session, create_engine
 
 
 class StrategyGenerateKeywordList(StrategyBase):
@@ -128,7 +128,7 @@ class StrategyGenerateKeywordList(StrategyBase):
 		engine_path: str = os.path.join(directory_path, self.get_db_name())
 		engine_conn_str: str = f"sqlite+aiosqlite:////{engine_path}"
 		self.logger.info(f"saving keywords to {engine_conn_str}")
-		db_engine: AsyncEngine = await init_engine(engine_conn_str)
+		db_engine: AsyncEngine = await create_engine(engine_conn_str)
 		session = get_db_session(db_engine)
 		async with session() as db:
 			for idx, file_path in enumerate(file_name_list):
